@@ -118,11 +118,9 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		return -1;
 	}
 
-	m_wndFileView.EnableDocking(CBRS_ALIGN_ANY);
 	m_wndClassView.EnableDocking(CBRS_ALIGN_ANY);
-	DockPane(&m_wndFileView);
+	DockPane(&m_wndClassView);
 	CDockablePane* pTabbedBar = NULL;
-	m_wndClassView.AttachToTabWnd(&m_wndFileView, DM_SHOW, TRUE, &pTabbedBar);
 	m_wndOutput.EnableDocking(CBRS_ALIGN_ANY);
 	DockPane(&m_wndOutput);
 	m_wndProperties.EnableDocking(CBRS_ALIGN_ANY);
@@ -200,16 +198,6 @@ BOOL CMainFrame::CreateDockingWindows()
 		return FALSE; // failed to create
 	}
 
-	// Create file view
-	CString strFileView;
-	bNameValid = strFileView.LoadString(IDS_FILE_VIEW);
-	ASSERT(bNameValid);
-	if (!m_wndFileView.Create(strFileView, this, CRect(0, 0, 200, 200), TRUE, ID_VIEW_FILEVIEW, WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | CBRS_LEFT| CBRS_FLOAT_MULTI))
-	{
-		TRACE0("Failed to create File View window\n");
-		return FALSE; // failed to create
-	}
-
 	// Create output window
 	CString strOutputWnd;
 	bNameValid = strOutputWnd.LoadString(IDS_OUTPUT_WND);
@@ -236,9 +224,6 @@ BOOL CMainFrame::CreateDockingWindows()
 
 void CMainFrame::SetDockingWindowIcons(BOOL bHiColorIcons)
 {
-	HICON hFileViewIcon = (HICON) ::LoadImage(::AfxGetResourceHandle(), MAKEINTRESOURCE(bHiColorIcons ? IDI_FILE_VIEW_HC : IDI_FILE_VIEW), IMAGE_ICON, ::GetSystemMetrics(SM_CXSMICON), ::GetSystemMetrics(SM_CYSMICON), 0);
-	m_wndFileView.SetIcon(hFileViewIcon, FALSE);
-
 	HICON hClassViewIcon = (HICON) ::LoadImage(::AfxGetResourceHandle(), MAKEINTRESOURCE(bHiColorIcons ? IDI_CLASS_VIEW_HC : IDI_CLASS_VIEW), IMAGE_ICON, ::GetSystemMetrics(SM_CXSMICON), ::GetSystemMetrics(SM_CYSMICON), 0);
 	m_wndClassView.SetIcon(hClassViewIcon, FALSE);
 
@@ -369,7 +354,7 @@ void CMainFrame::OnUpdateApplicationLook(CCmdUI* pCmdUI)
 	pCmdUI->SetRadio(theApp.m_nAppLook == pCmdUI->m_nID);
 }
 
-BOOL CMainFrame::LoadFrame(UINT nIDResource, DWORD dwDefaultStyle, CWnd* pParentWnd, CCreateContext* pContext) 
+BOOL CMainFrame::LoadFrame(UINT nIDResource, DWORD dwDefaultStyle, CWnd* pParentWnd, CCreateContext* pContext)
 {
 	// base class does the real work
 

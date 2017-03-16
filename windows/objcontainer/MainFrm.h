@@ -3,14 +3,13 @@
 //
 
 #pragma once
-#include "FileView.h"
 #include "ClassView.h"
 #include "OutputWnd.h"
 #include "PropertiesWnd.h"
 
 class CMainFrame : public CFrameWndEx
 {
-	
+
 protected: // create from serialization only
 	CMainFrame();
 	DECLARE_DYNCREATE(CMainFrame)
@@ -39,7 +38,6 @@ protected:  // control bar embedded members
 	CMFCToolBar       m_wndToolBar;
 	CMFCStatusBar     m_wndStatusBar;
 	CMFCToolBarImages m_UserImages;
-	CFileView         m_wndFileView;
 	CClassView        m_wndClassView;
 	COutputWnd        m_wndOutput;
 	CPropertiesWnd    m_wndProperties;

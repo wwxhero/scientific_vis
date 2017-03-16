@@ -125,7 +125,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ClassView.h" />
-    <ClInclude Include="FileView.h" />
     <ClInclude Include="MainFrm.h" />
     <ClInclude Include="objcontainer.h" />
     <ClInclude Include="objcontainerDoc.h" />
@@ -139,7 +138,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ClassView.cpp" />
-    <ClCompile Include="FileView.cpp" />
     <ClCompile Include="MainFrm.cpp" />
     <ClCompile Include="objcontainer.cpp" />
     <ClCompile Include="objcontainerDoc.cpp" />
