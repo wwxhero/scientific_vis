@@ -5,6 +5,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "objcontainer", "objcontaine
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "objvis", "libobjvis\objvis.vcxproj", "{7BF86B6C-9EC5-473C-A9EF-7919A587043F}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "primitiveTest", "primitiveTest\primitiveTest.vcxproj", "{88F39D36-7E8A-4F0D-A1DD-A8673B83D33C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -19,6 +21,10 @@ Global
 		{7BF86B6C-9EC5-473C-A9EF-7919A587043F}.Debug|Win32.Build.0 = Debug|Win32
 		{7BF86B6C-9EC5-473C-A9EF-7919A587043F}.Release|Win32.ActiveCfg = Release|Win32
 		{7BF86B6C-9EC5-473C-A9EF-7919A587043F}.Release|Win32.Build.0 = Release|Win32
+		{88F39D36-7E8A-4F0D-A1DD-A8673B83D33C}.Debug|Win32.ActiveCfg = Debug|Win32
+		{88F39D36-7E8A-4F0D-A1DD-A8673B83D33C}.Debug|Win32.Build.0 = Debug|Win32
+		{88F39D36-7E8A-4F0D-A1DD-A8673B83D33C}.Release|Win32.ActiveCfg = Release|Win32
+		{88F39D36-7E8A-4F0D-A1DD-A8673B83D33C}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
