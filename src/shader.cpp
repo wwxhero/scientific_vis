@@ -11,9 +11,9 @@ using namespace std;
 
 #include <GL/glew.h>
 
-#include "shader.h"
+#include "libobj.h"
 
-GLuint LoadShaders(const char * vertex_file_path, 
+GLuint LoadShaders(const char * vertex_file_path,
 	const char * fragment_file_path)
 {
 

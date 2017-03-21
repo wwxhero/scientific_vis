@@ -31,12 +31,10 @@ for the width and height arguements.
 #include <string.h>
 #include <assert.h>
 #include <iostream>
-using namespace std;
 
 #include <GL/glew.h>
 
-
-#include <GL\glu.h>
+#include <GL/glu.h>
 
 // glm::vec3, glm::vec4, glm::ivec4, glm::mat4
 #include <glm/glm.hpp>
@@ -44,12 +42,6 @@ using namespace std;
 #include <glm/gtc/matrix_transform.hpp>
 // glm::value_ptr
 #include <glm/gtc/type_ptr.hpp>
-
-
-
-
-
-
 
 #ifndef M_PI
 #define M_PI 3.14159265f
@@ -62,37 +54,24 @@ using namespace std;
 #define GLM_COLOR    (1 << 3)       /* render with colors */
 #define GLM_MATERIAL (1 << 4)       /* render with materials */
 
+#ifdef OBJVIS_EXPORTS
+#define OBJVIS_API_FUNC(ret, func)  __declspec(dllexport) ret __stdcall func
+#define OBJVIS_API_STRUCT __declspec(dllexport)
+#define OBJVIS_API_CLASS OBJVIS_API_STRUCT
+#else
+#define OBJVIS_API_FUNC(ret, func) ret __stdcall func
+#define OBJVIS_API_STRUCT
+#define OBJVIS_API_CLASS
+#endif
+
 
 /* GLMmaterial: Structure that defines a material in a model.
 */
-typedef struct _GLMmaterial
+typedef OBJVIS_API_STRUCT struct _GLMmaterial
 {
+	_GLMmaterial();
 
-	_GLMmaterial()
-	{
-		char default_name[] = "default_material";
-		name = default_name;
-		for (int i = 0; i < 4; i++)
-		{
-			diffuse[i] = 0.0;
-			ambient[i] = 0.6;
-			specular[i] = 0.7;
-			emmissive[i] = 0;
-		}
-		shininess = 100;
-		transparency = 0.5;
-	}
-
-	void display()
-	{
-		cout << "Material name: " << name << endl;
-		cout << "Diffuse: [" << diffuse[0] << ", " << diffuse[1] << ", " << diffuse[2] << ", " << diffuse[3] << "]" << endl;
-		cout << "Ambient: [" << ambient[0] << ", " << ambient[1] << ", " << ambient[2] << ", " << ambient[3] << "]" << endl;
-		cout << "Specular: [" << specular[0] << ", " << specular[1] << ", " << specular[2] << ", " << specular[3] << "]" << endl;
-		cout << "Emmissive: [" << emmissive[0] << ", " << emmissive[1] << ", " << emmissive[2] << ", " << emmissive[3] << "]" << endl;
-		cout << "Shininess: " << shininess << endl;
-		cout << "Transparency: " << transparency << endl;
-	}
+	void display();
 
 	char*   name;                 /* name of material */
 	GLfloat diffuse[4];           /* diffuse component */
@@ -105,7 +84,7 @@ typedef struct _GLMmaterial
 
 /* GLMtriangle: Structure that defines a triangle in a model.
 */
-typedef struct _GLMtriangle {
+typedef OBJVIS_API_STRUCT struct _GLMtriangle {
 	GLuint vindices[3];           /* array of triangle vertex indices */
 	GLuint nindices[3];           /* array of triangle normal indices */
 	GLuint tindices[3];           /* array of triangle texcoord indices*/
@@ -114,7 +93,7 @@ typedef struct _GLMtriangle {
 
 /* GLMgroup: Structure that defines a group in a model.
 */
-typedef struct _GLMgroup {
+typedef OBJVIS_API_STRUCT struct _GLMgroup {
 	char*             name;           /* name of this group */
 	GLuint            vao;            /* Vertex Array Object Number */
 	GLuint            vertexBuffer;
@@ -127,7 +106,7 @@ typedef struct _GLMgroup {
 
 /* GLMmodel: Structure that defines a model.
 */
-typedef struct _GLMmodel {
+OBJVIS_API_STRUCT struct _GLMmodel {
 	char*    pathname;            /* path to this model */
 	char*    mtllibname;          /* name of the material library */
 
@@ -157,7 +136,8 @@ typedef struct _GLMmodel {
 
 	GLuint vao;                   /* Vertex Array Object number */
 
-} GLMmodel;
+};
+typedef struct _GLMmodel  GLMmodel;
 
 
 /* glmUnitize: "unitize" a model by translating it to the origin and
@@ -166,8 +146,7 @@ typedef struct _GLMmodel {
 *
 * model - properly initialized GLMmodel structure
 */
-GLfloat
-	glmUnitize(GLMmodel* model);
+OBJVIS_API_FUNC(GLfloat, glmUnitize)(GLMmodel* model);
 
 /* glmDimensions: Calculates the dimensions (width, height, depth) of
 * a model.
@@ -175,16 +154,14 @@ GLfloat
 * model      - initialized GLMmodel structure
 * dimensions - array of 3 GLfloats (GLfloat dimensions[3])
 */
-GLvoid
-	glmDimensions(GLMmodel* model, GLfloat* dimensions);
+OBJVIS_API_FUNC(GLvoid, glmDimensions)(GLMmodel* model, GLfloat* dimensions);
 
 /* glmScale: Scales a model by a given amount.
 *
 * model - properly initialized GLMmodel structure
 * scale - scalefactor (0.5 = half as large, 2.0 = twice as large)
 */
-GLvoid
-	glmScale(GLMmodel* model, GLfloat scale);
+OBJVIS_API_FUNC(GLvoid, glmScale)(GLMmodel* model, GLfloat scale);
 
 /* glmReverseWinding: Reverse the polygon winding for all polygons in
 * this model.  Default winding is counter-clockwise.  Also changes
@@ -192,8 +169,7 @@ GLvoid
 *
 * model - properly initialized GLMmodel structure
 */
-GLvoid
-	glmReverseWinding(GLMmodel* model);
+OBJVIS_API_FUNC(GLvoid, glmReverseWinding)(GLMmodel* model);
 
 /* glmFacetNormals: Generates facet normals for a model (by taking the
 * cross product of the two vectors derived from the sides of each
@@ -201,8 +177,7 @@ GLvoid
 *
 * model - initialized GLMmodel structure
 */
-GLvoid
-	glmFacetNormals(GLMmodel* model);
+OBJVIS_API_FUNC(GLvoid, glmFacetNormals)(GLMmodel* model);
 
 /* glmVertexNormals: Generates smooth vertex normals for a model.
 * First builds a list of all the triangles each vertex is in.  Then
@@ -220,8 +195,7 @@ GLvoid
 * model - initialized GLMmodel structure
 * angle - maximum angle (in degrees) to smooth across
 */
-GLvoid
-	glmVertexNormals(GLMmodel* model, GLfloat angle);
+OBJVIS_API_FUNC(GLvoid, glmVertexNormals)(GLMmodel* model, GLfloat angle);
 
 /* glmLinearTexture: Generates texture coordinates according to a
 * linear projection of the texture map.  It generates these by
@@ -229,8 +203,7 @@ GLvoid
 *
 * model - pointer to initialized GLMmodel structure
 */
-GLvoid
-	glmLinearTexture(GLMmodel* model);
+OBJVIS_API_FUNC(GLvoid, glmLinearTexture)(GLMmodel* model);
 
 /* glmSpheremapTexture: Generates texture coordinates according to a
 * spherical projection of the texture map.  Sometimes referred to as
@@ -243,15 +216,13 @@ GLvoid
 *
 * model - pointer to initialized GLMmodel structure
 */
-GLvoid
-	glmSpheremapTexture(GLMmodel* model);
+OBJVIS_API_FUNC(GLvoid, glmSpheremapTexture)(GLMmodel* model);
 
 /* glmDelete: Deletes a GLMmodel structure.
 *
 * model - initialized GLMmodel structure
 */
-GLvoid
-	glmDelete(GLMmodel* model);
+OBJVIS_API_FUNC(GLvoid, glmDelete)(GLMmodel* model);
 
 /* glmReadOBJ: Reads a model description from a Wavefront .OBJ file.
 * Returns a pointer to the created object which should be free'd with
@@ -259,8 +230,7 @@ GLvoid
 *
 * filename - name of the file containing the Wavefront .OBJ format data.
 */
-GLMmodel*
-	glmReadOBJ(char* filename);
+OBJVIS_API_FUNC(_GLMmodel*, glmReadOBJ)(char* filename);
 
 /* glmWriteOBJ: Writes a model description in Wavefront .OBJ format to
 * a file.
@@ -274,8 +244,7 @@ GLMmodel*
 *            GLM_TEXTURE -  write texture coords
 *            GLM_FLAT and GLM_SMOOTH should not both be specified.
 */
-GLvoid
-	glmWriteOBJ(GLMmodel* model, char* filename, GLuint mode);
+OBJVIS_API_FUNC(GLvoid, glmWriteOBJ)(GLMmodel* model, char* filename, GLuint mode);
 
 /* glmDraw: Renders the model to the current OpenGL context using the
 * mode specified.
@@ -288,8 +257,7 @@ GLvoid
 *            GLM_TEXTURE -  render with texture coords
 *            GLM_FLAT and GLM_SMOOTH should not both be specified.
 */
-GLvoid
-	glmDraw(GLMmodel* model, GLuint mode);
+OBJVIS_API_FUNC(GLvoid, glmDraw)(GLMmodel* model, GLuint mode);
 
 /* glmList: Generates and returns a display list for the model using
 * the mode specified.
@@ -302,8 +270,7 @@ GLvoid
 *            GLM_TEXTURE -  render with texture coords
 *            GLM_FLAT and GLM_SMOOTH should not both be specified.
 */
-GLuint
-	glmList(GLMmodel* model, GLuint mode);
+OBJVIS_API_FUNC(GLuint, glmList)(GLMmodel* model, GLuint mode);
 
 /* glmWeld: eliminate (weld) vectors that are within an epsilon of
 * each other.
@@ -313,8 +280,7 @@ GLuint
 *              ( 0.00001 is a good start for a unitized model)
 *
 */
-GLvoid
-	glmWeld(GLMmodel* model, GLfloat epsilon);
+OBJVIS_API_FUNC(GLvoid, glmWeld)(GLMmodel* model, GLfloat epsilon);
 
 /* glmReadPPM: read a PPM raw (type P6) file.  The PPM file has a header
 * that should look something like:
@@ -344,9 +310,10 @@ GLvoid
 * height     - will contain the height of the image on return.
 *
 */
-GLubyte*
-	glmReadPPM(char* filename, int* width, int* height);
+OBJVIS_API_FUNC(GLubyte*, glmReadPPM)(char* filename, int* width, int* height);
 
 
-GLvoid glmLoadInVBO(GLMmodel* model);
-GLvoid glmDrawVBO(GLMmodel* model, GLuint program);
+OBJVIS_API_FUNC(GLvoid, glmLoadInVBO)(GLMmodel* model);
+OBJVIS_API_FUNC(GLvoid, glmDrawVBO)(GLMmodel* model, GLuint program);
+
+OBJVIS_API_FUNC(GLuint, LoadShaders)(const char * vertex_file_path,const char * fragment_file_path);

@@ -23,8 +23,6 @@
 // #include <GL/freeglut_ext.h>
 #include <GL/glut.h>
 
-#include "shader.h"
-
 #include "libobj.h"
 
 GLMmodel* objModel;
