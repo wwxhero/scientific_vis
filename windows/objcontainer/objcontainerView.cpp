@@ -28,6 +28,7 @@ BEGIN_MESSAGE_MAP(CobjcontainerView, CView)
 	ON_COMMAND(ID_FILE_PRINT_PREVIEW, &CobjcontainerView::OnFilePrintPreview)
 	ON_WM_CONTEXTMENU()
 	ON_WM_RBUTTONUP()
+	ON_WM_ERASEBKGND()
 END_MESSAGE_MAP()
 
 // CobjcontainerView construction/destruction
@@ -46,22 +47,52 @@ BOOL CobjcontainerView::PreCreateWindow(CREATESTRUCT& cs)
 {
 	// TODO: Modify the Window class or styles here by modifying
 	//  the CREATESTRUCT cs
-
-	return CView::PreCreateWindow(cs);
+	return CView::PreCreateWindow(cs)
+		&& TOpenGLView::PreCreateWindow(cs);
 }
 
 // CobjcontainerView drawing
-
-void CobjcontainerView::OnDraw(CDC* /*pDC*/)
+void CobjcontainerView::OnGLDraw()
 {
-	CobjcontainerDoc* pDoc = GetDocument();
-	ASSERT_VALID(pDoc);
-	if (!pDoc)
-		return;
-
-	// TODO: add draw code for native data here
+	TRACE(_T("CobjcontainerView::OnGLDraw\n"));
 }
 
+void CobjcontainerView::OnDraw(CDC* pDC)
+{
+	TOpenGLView::OnDraw(pDC);
+}
+
+void CobjcontainerView::OnUpdateGLData()
+{
+	TRACE(_T("OnUpdateGLData\n"));
+}
+
+
+
+void CobjcontainerView::OnDestroy()
+{
+	CView::OnDestroy();
+	TOpenGLView::OnDestroy();
+}
+
+int CobjcontainerView::OnGLCreate()
+{
+	TRACE(_T("CobjcontainerView::OnGLCreate\n"));
+	return 0;
+}
+
+int CobjcontainerView::OnCreate(LPCREATESTRUCT lpCreateStruct)
+{
+	int result = CView::OnCreate(lpCreateStruct);
+	if (0 == result)
+		result = TOpenGLView::OnCreate(lpCreateStruct);
+	return result;
+}
+
+BOOL CobjcontainerView::OnEraseBkgnd(CDC* pDC)
+{
+	return TRUE;
+}
 
 // CobjcontainerView printing
 
