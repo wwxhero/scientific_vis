@@ -29,6 +29,7 @@ BEGIN_MESSAGE_MAP(CobjcontainerView, CView)
 	ON_WM_CONTEXTMENU()
 	ON_WM_RBUTTONUP()
 	ON_WM_ERASEBKGND()
+	ON_WM_CREATE()
 END_MESSAGE_MAP()
 
 // CobjcontainerView construction/destruction
