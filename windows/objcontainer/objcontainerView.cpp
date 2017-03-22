@@ -37,11 +37,12 @@ BEGIN_MESSAGE_MAP(CobjcontainerView, CView)
 	ON_WM_ERASEBKGND()
 	ON_WM_CREATE()
 	ON_WM_SIZE()
+	ON_WM_DESTROY()
 END_MESSAGE_MAP()
 
 // CobjcontainerView construction/destruction
 
-CobjcontainerView::CobjcontainerView()
+CobjcontainerView::CobjcontainerView() : m_objModel(NULL)
 {
 	// TODO: add construction code here
 
@@ -89,33 +90,33 @@ void CobjcontainerView::OnGLDraw()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 
-	model = glm::mat4(1.0f);
-	glm::mat4 xRotMat = glm::rotate(glm::mat4(1.0f), 0.0f, glm::normalize(glm::vec3(glm::inverse(model) * glm::vec4(1, 0, 0, 1))) );
-	model = model * xRotMat;
-	glm::mat4 yRotMat = glm::rotate(glm::mat4(1.0f), 0.0f, glm::normalize(glm::vec3(glm::inverse(model) * glm::vec4(0, 1, 0, 1))) );
-	model = model * yRotMat;
+	m_model = glm::mat4(1.0f);
+	glm::mat4 xRotMat = glm::rotate(glm::mat4(1.0f), 0.0f, glm::normalize(glm::vec3(glm::inverse(m_model) * glm::vec4(1, 0, 0, 1))) );
+	m_model = m_model * xRotMat;
+	glm::mat4 yRotMat = glm::rotate(glm::mat4(1.0f), 0.0f, glm::normalize(glm::vec3(glm::inverse(m_model) * glm::vec4(0, 1, 0, 1))) );
+	m_model = m_model * yRotMat;
 
-	glm::mat4 modelViewMatrix = view * model;
+	glm::mat4 modelViewMatrix = m_view * m_model;
 	glm::mat3 normalMatrix = glm::inverseTranspose(glm::mat3(modelViewMatrix)); // Normal Matrix
 
 	// Use our shader
-	glUseProgram(programID);
-	// Send the model, view and projection matrices to the shader
-	glUniformMatrix4fv(modelID, 1, GL_FALSE, &model[0][0]);
-	glUniformMatrix4fv(viewID, 1, GL_FALSE, &view[0][0]);
-	glUniformMatrix4fv(projectionID, 1, GL_FALSE, &projection[0][0]);
-	glUniformMatrix3fv( glGetUniformLocation(programID, "normalMatrix"), 1, GL_FALSE, &normalMatrix[0][0]);
+	glUseProgram(m_programID);
+	// Send the m_model, m_view and projection matrices to the shader
+	glUniformMatrix4fv(m_modelID, 1, GL_FALSE, &m_model[0][0]);
+	glUniformMatrix4fv(m_viewID, 1, GL_FALSE, &m_view[0][0]);
+	glUniformMatrix4fv(m_projectionID, 1, GL_FALSE, &m_projection[0][0]);
+	glUniformMatrix3fv( glGetUniformLocation(m_programID, "normalMatrix"), 1, GL_FALSE, &normalMatrix[0][0]);
 
-	glmDrawVBO(objModel, programID);
+	glmDrawVBO(m_objModel, m_programID);
 
-	TRACE(_T("programID:%d, modelID:%d, projectionID:%d\n"), programID, modelID, projectionID);
+	TRACE(_T("m_programID:%d, m_modelID:%d, m_projectionID:%d\n"), m_programID, m_modelID, m_projectionID);
 
 	TRACE(_T("\nmodel matrix\n"));
-	DumpMatrix4x4(model);
+	DumpMatrix4x4(m_model);
 	TRACE(_T("\nview matrix\n"));
-	DumpMatrix4x4(view);
+	DumpMatrix4x4(m_view);
 	TRACE(_T("\nProjection matrx\n"));
-	DumpMatrix4x4(projection);
+	DumpMatrix4x4(m_projection);
 	TRACE(_T("\nnormalMatrix\n"));
 	DumpMatrix3x3(normalMatrix);
 
@@ -137,24 +138,30 @@ void CobjcontainerView::OnDestroy()
 {
 	CView::OnDestroy();
 	TOpenGLView::OnDestroy();
-	glmDelete(objModel);
+	glmDelete(m_objModel);
+	m_objModel = NULL;
 }
 
 int CobjcontainerView::OnGLCreate()
 {
 	TRACE(_T("CobjcontainerView::OnGLCreate\n"));
-	//objModel = glmReadOBJ("E:\\Users\\wanxwang\\scientific_vis\\course_project\\objview\\data\\al.obj");
-	objModel = glmReadOBJ("al.obj");
-	if (!objModel) return 1;
+	//m_objModel = glmReadOBJ("E:\\Users\\wanxwang\\scientific_vis\\course_project\\objview\\data\\al.obj");
+	if (NULL != m_objModel)
+	{
+		glmDelete(m_objModel);
+		m_objModel = NULL;
+	}
+	m_objModel = glmReadOBJ("al.obj");
+	if (!m_objModel) return 1;
 
 	// Normilize vertices
-	glmUnitize(objModel);
+	glmUnitize(m_objModel);
 	// Compute facet normals
-	glmFacetNormals(objModel);
+	glmFacetNormals(m_objModel);
 	// Comput vertex normals
-	glmVertexNormals(objModel, 90.0);
-	// Load the model (vertices and normals) into a vertex buffer
-	glmLoadInVBO(objModel);
+	glmVertexNormals(m_objModel, 90.0);
+	// Load the m_model (vertices and normals) into a vertex buffer
+	glmLoadInVBO(m_objModel);
 
 	// Black background
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
@@ -170,42 +177,42 @@ int CobjcontainerView::OnGLCreate()
 	//glBindVertexArray(VertexArrayID);
 
 	// Create and compile our GLSL program from the shaders
-	programID = LoadShaders( "../shaders/vertShader.glsl", "../shaders/fragShader.glsl" );
+	m_programID = LoadShaders( "../shaders/vertShader.glsl", "../shaders/fragShader.glsl" );
 
-	// Get a handle for our model, view and projection uniforms
-	modelID = glGetUniformLocation(programID, "model");
-	viewID = glGetUniformLocation(programID, "view");
-	projectionID = glGetUniformLocation(programID, "projection");
+	// Get a handle for our m_model, m_view and projection uniforms
+	m_modelID = glGetUniformLocation(m_programID, "model");
+	m_viewID = glGetUniformLocation(m_programID, "view");
+	m_projectionID = glGetUniformLocation(m_programID, "projection");
 
 	glm::vec4 light_ambient = glm::vec4( 0.1, 0.1, 0.1, 0.5 );
 	glm::vec4 light_diffuse = glm::vec4 ( 0.8, 1.0, 1.0, 1.0 );
 	glm::vec4 light_specular = glm::vec4( 0.8, 1.0, 1.0, 1.0 );
 
-	glUseProgram(programID);
-	glUniform4fv( glGetUniformLocation(programID, "light_ambient"), 1, &light_ambient[0]);
-	glUniform4fv( glGetUniformLocation(programID, "light_diffuse"), 1, &light_diffuse[0]);
-	glUniform4fv( glGetUniformLocation(programID, "light_specular"), 1, &light_specular[0]);
+	glUseProgram(m_programID);
+	glUniform4fv( glGetUniformLocation(m_programID, "light_ambient"), 1, &light_ambient[0]);
+	glUniform4fv( glGetUniformLocation(m_programID, "light_diffuse"), 1, &light_diffuse[0]);
+	glUniform4fv( glGetUniformLocation(m_programID, "light_specular"), 1, &light_specular[0]);
 
 	// Projection matrix : 45° Field of View, 4:3 ratio, display range : 0.1 unit <-> 100 units
-	projection = glm::perspective(45.0f, 4.0f / 3.0f, 0.1f, 100.0f);
+	m_projection = glm::perspective(45.0f, 4.0f / 3.0f, 0.1f, 100.0f);
 	// Camera matrix
-	view = glm::lookAt( glm::vec3(0, 0, 3), // Camera position in World Space
+	m_view = glm::lookAt( glm::vec3(0, 0, 3), // Camera position in World Space
 	                    glm::vec3(0, 0, 0), // and looks at the origin
 	                    glm::vec3(0, 1, 0) // Head is up (set to 0,-1,0 to look upside-down)
 	                  );
-	// Model matrix : an identity matrix (model will be at the origin)
-	model      = glm::mat4(1.0f);
+	// Model matrix : an identity matrix (m_model will be at the origin)
+	m_model      = glm::mat4(1.0f);
 
 	// Initialize a light
 	glm::vec4 lightPosition = glm::vec4(-20, -10, 0, 0);
-	glUniform4fv( glGetUniformLocation(programID, "lightPos"), 1, &lightPosition[0]);
+	glUniform4fv( glGetUniformLocation(m_programID, "lightPos"), 1, &lightPosition[0]);
 	return 0;
 }
 
 void CobjcontainerView::OnGLSize(int cx, int cy)
 {
 	GLfloat aspectRatio = GLfloat(cx)/cy;
-	projection = glm::perspective(45.0f, aspectRatio, 0.1f, 100.0f);
+	m_projection = glm::perspective(45.0f, aspectRatio, 0.1f, 100.0f);
 }
 
 

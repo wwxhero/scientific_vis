@@ -23,7 +23,7 @@ public:
 // Overrides
 public:
 	virtual void OnDestroy();
-	virtual void OnDraw(CDC* pDC);  // overridden to draw this view
+	virtual void OnDraw(CDC* pDC);  // overridden to draw this m_view
 	virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
 protected:
 	virtual BOOL OnPreparePrinting(CPrintInfo* pInfo);
@@ -57,19 +57,17 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 private:
-	GLMmodel* objModel;
-	GLuint programID;
+	GLMmodel* m_objModel;
+	GLuint m_programID;
 
-	GLuint modelID;
-	GLuint viewID;
-	GLuint projectionID;
+	GLuint m_modelID;
+	GLuint m_viewID;
+	GLuint m_projectionID;
 
-	glm::mat4 model;
-	glm::mat4 view;
-	glm::mat4 projection;
+	glm::mat4 m_model;
+	glm::mat4 m_view;
+	glm::mat4 m_projection;
 
-	GLuint vertexbuffer;
-	GLuint normalbuffer;
 };
 
 #ifndef _DEBUG  // debug version in objcontainerView.cpp
