@@ -18,6 +18,7 @@ private:
 	virtual int OnGLCreate() = 0;
 	virtual void OnGLDraw() = 0;
 	virtual void OnUpdateGLData() = 0;
+	virtual void OnGLSize(int cx, int cy) = 0;
 protected:
 	int OnCreate(LPCREATESTRUCT lpCreateStruct)
 	{
@@ -56,7 +57,7 @@ protected:
 				int attribs[] =
 				{
 					WGL_CONTEXT_MAJOR_VERSION_ARB, 3,
-					WGL_CONTEXT_MINOR_VERSION_ARB, 0,
+					WGL_CONTEXT_MINOR_VERSION_ARB, 3,
 					WGL_CONTEXT_FLAGS_ARB, 0,
 					0
 				};
@@ -107,9 +108,10 @@ protected:
 				AfxMessageBox(_T("failed to make current"));
 				return;
 			}
-			OnGLDraw();
-			glFlush();
 
+			OnGLDraw();
+
+			glFlush();
 			SwapBuffers(hDC);
 
 			wglMakeCurrent(NULL, NULL);
@@ -130,6 +132,22 @@ protected:
 		cs.lpszClass = AfxRegisterWndClass(CS_HREDRAW | CS_VREDRAW | CS_OWNDC, NULL, (HBRUSH)GetStockObject(WHITE_BRUSH), NULL); //default background colour
 		cs.style = WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN;
 		return TRUE;
+	}
+
+	void OnSize(int cx, int cy)
+	{
+		TThis* pThis = static_cast<TThis *>(this);
+		CDC *pDC = pThis->GetDC();
+		HDC hDC = pDC->m_hDC;
+		wglMakeCurrent(hDC, m_hrc);
+
+		if (cx > 0 && cy > 0)
+		{
+			glViewport(0, 0, cx, cy);
+			OnGLSize(cx, cy);
+		}
+		wglMakeCurrent(NULL, NULL);
+		pThis->ReleaseDC(pDC);
 	}
 private:
 	HGLRC m_hrc;

@@ -4,6 +4,7 @@
 
 #pragma once
 #include "TOpenGLView.h"
+#include "libobj.h"
 
 class CobjcontainerView : public CView
 						, protected TOpenGLView<CobjcontainerView>
@@ -42,6 +43,7 @@ protected:
 	virtual int OnGLCreate();
 	virtual void OnGLDraw();
 	virtual void OnUpdateGLData();
+	virtual void OnGLSize(int cx, int cy);
 
 // Generated message map functions
 protected:
@@ -50,7 +52,24 @@ protected:
 	afx_msg void OnContextMenu(CWnd* pWnd, CPoint point);
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
+	afx_msg void OnSize(UINT nType, int cx, int cy);
+
 	DECLARE_MESSAGE_MAP()
+
+private:
+	GLMmodel* objModel;
+	GLuint programID;
+
+	GLuint modelID;
+	GLuint viewID;
+	GLuint projectionID;
+
+	glm::mat4 model;
+	glm::mat4 view;
+	glm::mat4 projection;
+
+	GLuint vertexbuffer;
+	GLuint normalbuffer;
 };
 
 #ifndef _DEBUG  // debug version in objcontainerView.cpp

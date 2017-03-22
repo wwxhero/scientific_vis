@@ -36,8 +36,6 @@ glm::mat4 model;
 glm::mat4 view;
 glm::mat4 projection;
 
-GLuint vertexbuffer;
-GLuint normalbuffer;
 
 // Rotation interface
 float xrot = 0;
@@ -81,11 +79,32 @@ void mouseCB(int button, int state, int x, int y)
   }
 }
 
+#define TRACE _tprintf
+
+
+void DumpMatrix4x4(const glm::mat4& m)
+{
+  for (int i = 0; i < 4; i ++)
+  {
+    glm::vec4 v = m[i];
+    TRACE(_T("\t\n%f %f %f %f"), v[0], v[1], v[2], v[3]);
+  }
+}
+
+void DumpMatrix3x3(const glm::mat3& m)
+{
+  for (int i = 0; i < 3; i ++)
+  {
+    glm::vec3 v = m[i];
+    TRACE(_T("\t\n%f %f %f"), v[0], v[1], v[2]);
+  }
+}
+
 void display(void)
 
 {
- // glClearColor(0, 1, 0, 0);
-  //glClearDepth(1);
+  glClearColor(0, 1, 0, 0);
+  glClearDepth(1);
   // Clear the screne
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -111,6 +130,17 @@ void display(void)
 
   // Swap buffers
   glutSwapBuffers();
+
+  TRACE(_T("programID:%d, modelID:%d, projectionID:%d\n"), programID, modelID, projectionID);
+
+	TRACE(_T("\nmodel matrix\n"));
+	DumpMatrix4x4(model);
+	TRACE(_T("\nview matrix\n"));
+	DumpMatrix4x4(view);
+	TRACE(_T("\nProjection matrx\n"));
+	DumpMatrix4x4(projection);
+	TRACE(_T("\nnormalMatrix\n"));
+	DumpMatrix3x3(normalMatrix);
 
 }
 
