@@ -27,11 +27,17 @@ for the width and height arguements.
 #include "libobj.h"
 
 
-
 #include <iostream>
 using namespace std;
 
+#ifdef _WINDOWS
+#define DELIMITER '\\'
+#else
+#define DELIMITER '/'
+#endif
+
 #define T(x) (model->triangles[(x)])
+
 
 _GLMmaterial::_GLMmaterial()
 {
@@ -270,7 +276,7 @@ static char*
 
 	dir = strdup(path);
 
-	s = strrchr(dir, '/');
+	s = strrchr(dir, DELIMITER);
 	if (s)
 		s[1] = '\0';
 	else
