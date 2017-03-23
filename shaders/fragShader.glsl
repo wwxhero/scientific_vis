@@ -22,7 +22,7 @@ uniform vec4 light_specular;
 void main()
 {
 
-  
+
   vec4 AmbientProduct = light_ambient * mat_ambient;
   vec4 DiffuseProduct = light_diffuse * mat_diffuse;
   vec4 SpecularProduct = light_specular * mat_specular;
@@ -40,12 +40,11 @@ void main()
   vec4 diffuse = Kd*DiffuseProduct;
   float Ks = pow(max(dot(N, H), 0.0), 6.0);
   vec4 specular = Ks*SpecularProduct;
-  if( dot(L, N) < 0.0 )
-    {
-      specular = vec4(0.0, 0.0, 0.0, 1.0);
-    }
+  float coeficient_s = max(0, dot(L, N));
+  coeficient_s = normalize(coeficient_s);
+  specular = coeficient_s * specular;
   color +=diffuse + specular;
-  
+
   color.a = 1.0f;
 
 

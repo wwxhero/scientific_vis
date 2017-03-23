@@ -2,7 +2,7 @@
 
 // Input vertex data, different for all executions of this shader.
 layout(location = 0) in vec3 vertexPosition; // Vertex position in model space
-layout(location = 1) in vec3 vertexNormal;
+layout(location = 1) in vec3 vertexNormal; //direction of normal
 
 
 
@@ -19,14 +19,14 @@ out vec3 fE;
 out vec3 fL;
 
 void main()
-{	
+{
   vec3 pos = (view * model * vec4(vertexPosition,1)).xyz;
   fN = normalize(normalMatrix * vertexNormal);
   fL = -(view * lightPos).xyz;
   fE = -pos;
   // Output position of the vertex, in clip space : MVP * position
-  
+
   gl_Position =  projection * view * model * vec4(vertexPosition,1);
-  
+
 }
 

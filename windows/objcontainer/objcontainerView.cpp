@@ -151,7 +151,7 @@ int CobjcontainerView::OnGLCreate()
 		glmDelete(m_objModel);
 		m_objModel = NULL;
 	}
-	m_objModel = glmReadOBJ("al.obj");
+	m_objModel = glmReadOBJ("car.obj");
 	if (!m_objModel) return 1;
 
 	// Normilize vertices
