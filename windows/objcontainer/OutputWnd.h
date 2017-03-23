@@ -35,8 +35,8 @@ public:
 protected:
 	CMFCTabCtrl	m_wndTabs;
 
-	COutputList m_wndOutputBuild;
-	COutputList m_wndOutputDebug;
+	COutputList m_wndOutputFaces;
+	COutputList m_wndOutputVertices;
 
 protected:
 	void FillBuildWindow();

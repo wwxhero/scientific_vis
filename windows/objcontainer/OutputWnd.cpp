@@ -45,8 +45,8 @@ int COutputWnd::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	// Create output panes:
 	const DWORD dwStyle = LBS_NOINTEGRALHEIGHT | WS_CHILD | WS_VISIBLE | WS_HSCROLL | WS_VSCROLL;
 
-	if (!m_wndOutputBuild.Create(dwStyle, rectDummy, &m_wndTabs, 2)
-	||	!m_wndOutputDebug.Create(dwStyle, rectDummy, &m_wndTabs, 3))
+	if (!m_wndOutputFaces.Create(dwStyle, rectDummy, &m_wndTabs, 2)
+	||	!m_wndOutputVertices.Create(dwStyle, rectDummy, &m_wndTabs, 3))
 	{
 		TRACE0("Failed to create output windows\n");
 		return -1;      // fail to create
@@ -60,10 +60,10 @@ int COutputWnd::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	// Attach list windows to tab:
 	bNameValid = strTabName.LoadString(IDS_BUILD_TAB);
 	ASSERT(bNameValid);
-	m_wndTabs.AddTab(&m_wndOutputBuild, strTabName, (UINT)0);
+	m_wndTabs.AddTab(&m_wndOutputFaces, strTabName, (UINT)0);
 	bNameValid = strTabName.LoadString(IDS_DEBUG_TAB);
 	ASSERT(bNameValid);
-	m_wndTabs.AddTab(&m_wndOutputDebug, strTabName, (UINT)1);
+	m_wndTabs.AddTab(&m_wndOutputVertices, strTabName, (UINT)1);
 	bNameValid = strTabName.LoadString(IDS_FIND_TAB);
 	ASSERT(bNameValid);
 
@@ -103,24 +103,20 @@ void COutputWnd::AdjustHorzScroll(CListBox& wndListBox)
 
 void COutputWnd::FillBuildWindow()
 {
-	m_wndOutputBuild.AddString(_T("Build output is being displayed here."));
-	m_wndOutputBuild.AddString(_T("The output is being displayed in rows of a list view"));
-	m_wndOutputBuild.AddString(_T("but you can change the way it is displayed as you wish..."));
+	m_wndOutputFaces.AddString(_T("In this view, a list of triangular faces will be presented"));
 }
 
 void COutputWnd::FillDebugWindow()
 {
-	m_wndOutputDebug.AddString(_T("Debug output is being displayed here."));
-	m_wndOutputDebug.AddString(_T("The output is being displayed in rows of a list view"));
-	m_wndOutputDebug.AddString(_T("but you can change the way it is displayed as you wish..."));
+	m_wndOutputVertices.AddString(_T("In this view, a list of vertices will be presented"));
 }
 
 
 
 void COutputWnd::UpdateFonts()
 {
-	m_wndOutputBuild.SetFont(&afxGlobalData.fontRegular);
-	m_wndOutputDebug.SetFont(&afxGlobalData.fontRegular);
+	m_wndOutputFaces.SetFont(&afxGlobalData.fontRegular);
+	m_wndOutputVertices.SetFont(&afxGlobalData.fontRegular);
 }
 
 /////////////////////////////////////////////////////////////////////////////
