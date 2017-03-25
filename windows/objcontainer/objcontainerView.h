@@ -25,6 +25,8 @@ public:
 	virtual void OnDestroy();
 	virtual void OnDraw(CDC* pDC);  // overridden to draw this m_view
 	virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
+	virtual void OnUpdate(CView* pSender, LPARAM lHint, CObject* pHint);
+
 protected:
 	virtual BOOL OnPreparePrinting(CPrintInfo* pInfo);
 	virtual void OnBeginPrinting(CDC* pDC, CPrintInfo* pInfo);

@@ -89,37 +89,38 @@ void CobjcontainerView::OnGLDraw()
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+	if (m_objModel)
+	{
+		m_model = glm::mat4(1.0f);
+		glm::mat4 xRotMat = glm::rotate(glm::mat4(1.0f), 0.0f, glm::normalize(glm::vec3(glm::inverse(m_model) * glm::vec4(1, 0, 0, 1))) );
+		m_model = m_model * xRotMat;
+		glm::mat4 yRotMat = glm::rotate(glm::mat4(1.0f), 0.0f, glm::normalize(glm::vec3(glm::inverse(m_model) * glm::vec4(0, 1, 0, 1))) );
+		m_model = m_model * yRotMat;
 
-	m_model = glm::mat4(1.0f);
-	glm::mat4 xRotMat = glm::rotate(glm::mat4(1.0f), 0.0f, glm::normalize(glm::vec3(glm::inverse(m_model) * glm::vec4(1, 0, 0, 1))) );
-	m_model = m_model * xRotMat;
-	glm::mat4 yRotMat = glm::rotate(glm::mat4(1.0f), 0.0f, glm::normalize(glm::vec3(glm::inverse(m_model) * glm::vec4(0, 1, 0, 1))) );
-	m_model = m_model * yRotMat;
+		glm::mat4 modelViewMatrix = m_view * m_model;
+		glm::mat3 normalMatrix = glm::inverseTranspose(glm::mat3(modelViewMatrix)); // Normal Matrix
 
-	glm::mat4 modelViewMatrix = m_view * m_model;
-	glm::mat3 normalMatrix = glm::inverseTranspose(glm::mat3(modelViewMatrix)); // Normal Matrix
+		// Use our shader
+		glUseProgram(m_programID);
+		// Send the m_model, m_view and projection matrices to the shader
+		glUniformMatrix4fv(m_modelID, 1, GL_FALSE, &m_model[0][0]);
+		glUniformMatrix4fv(m_viewID, 1, GL_FALSE, &m_view[0][0]);
+		glUniformMatrix4fv(m_projectionID, 1, GL_FALSE, &m_projection[0][0]);
+		glUniformMatrix3fv( glGetUniformLocation(m_programID, "normalMatrix"), 1, GL_FALSE, &normalMatrix[0][0]);
 
-	// Use our shader
-	glUseProgram(m_programID);
-	// Send the m_model, m_view and projection matrices to the shader
-	glUniformMatrix4fv(m_modelID, 1, GL_FALSE, &m_model[0][0]);
-	glUniformMatrix4fv(m_viewID, 1, GL_FALSE, &m_view[0][0]);
-	glUniformMatrix4fv(m_projectionID, 1, GL_FALSE, &m_projection[0][0]);
-	glUniformMatrix3fv( glGetUniformLocation(m_programID, "normalMatrix"), 1, GL_FALSE, &normalMatrix[0][0]);
+		glmDrawVBO(m_objModel, m_programID);
 
-	glmDrawVBO(m_objModel, m_programID);
+		TRACE(_T("m_programID:%d, m_modelID:%d, m_projectionID:%d\n"), m_programID, m_modelID, m_projectionID);
 
-	TRACE(_T("m_programID:%d, m_modelID:%d, m_projectionID:%d\n"), m_programID, m_modelID, m_projectionID);
-
-	TRACE(_T("\nmodel matrix\n"));
-	DumpMatrix4x4(m_model);
-	TRACE(_T("\nview matrix\n"));
-	DumpMatrix4x4(m_view);
-	TRACE(_T("\nProjection matrx\n"));
-	DumpMatrix4x4(m_projection);
-	TRACE(_T("\nnormalMatrix\n"));
-	DumpMatrix3x3(normalMatrix);
-
+		TRACE(_T("\nmodel matrix\n"));
+		DumpMatrix4x4(m_model);
+		TRACE(_T("\nview matrix\n"));
+		DumpMatrix4x4(m_view);
+		TRACE(_T("\nProjection matrx\n"));
+		DumpMatrix4x4(m_projection);
+		TRACE(_T("\nnormalMatrix\n"));
+		DumpMatrix3x3(normalMatrix);
+	}
 }
 
 void CobjcontainerView::OnDraw(CDC* pDC)
@@ -130,6 +131,28 @@ void CobjcontainerView::OnDraw(CDC* pDC)
 void CobjcontainerView::OnUpdateGLData()
 {
 	TRACE(_T("OnUpdateGLData\n"));
+	if (NULL != m_objModel)
+	{
+		glmDelete(m_objModel);
+		m_objModel = NULL;
+	}
+	CobjcontainerDoc *pDoc = GetDocument();
+	LPCTSTR filePath = pDoc->GetPathName();
+	static LPCTSTR s_filePath = NULL;
+	if (filePath != s_filePath
+		&& *filePath != _T('\0'))
+	{
+		m_objModel = glmReadOBJ(const_cast<char*>(filePath));
+		// Normilize vertices
+		glmUnitize(m_objModel);
+		// Compute facet normals
+		glmFacetNormals(m_objModel);
+		// Comput vertex normals
+		glmVertexNormals(m_objModel, 90.0);
+		// Load the m_model (vertices and normals) into a vertex buffer
+		glmLoadInVBO(m_objModel);
+		s_filePath = filePath;
+	}
 }
 
 
@@ -141,27 +164,15 @@ void CobjcontainerView::OnDestroy()
 	glmDelete(m_objModel);
 	m_objModel = NULL;
 }
+void CobjcontainerView::OnUpdate(CView* pSender, LPARAM lHint, CObject* pHint)
+{
+	CView::OnUpdate(pSender, lHint, pHint);
+	UpdateGLData();
+}
 
 int CobjcontainerView::OnGLCreate()
 {
 	TRACE(_T("CobjcontainerView::OnGLCreate\n"));
-	//m_objModel = glmReadOBJ("E:\\Users\\wanxwang\\scientific_vis\\course_project\\objview\\data\\al.obj");
-	if (NULL != m_objModel)
-	{
-		glmDelete(m_objModel);
-		m_objModel = NULL;
-	}
-	m_objModel = glmReadOBJ("car.obj");
-	if (!m_objModel) return 1;
-
-	// Normilize vertices
-	glmUnitize(m_objModel);
-	// Compute facet normals
-	glmFacetNormals(m_objModel);
-	// Comput vertex normals
-	glmVertexNormals(m_objModel, 90.0);
-	// Load the m_model (vertices and normals) into a vertex buffer
-	glmLoadInVBO(m_objModel);
 
 	// Black background
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);

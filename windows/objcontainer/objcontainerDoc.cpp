@@ -92,7 +92,7 @@ void CobjcontainerDoc::OnDrawThumbnail(CDC& dc, LPRECT lprcBounds)
 void CobjcontainerDoc::InitializeSearchContent()
 {
 	CString strSearchContent;
-	// Set search contents from document's data. 
+	// Set search contents from document's data.
 	// The content parts should be separated by ";"
 
 	// For example:  strSearchContent = _T("point;rectangle;circle;ole object;");
