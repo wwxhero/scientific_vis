@@ -32,6 +32,8 @@ BEGIN_MESSAGE_MAP(CobjcontainerView, CView)
 	ON_COMMAND(ID_FILE_PRINT, &CView::OnFilePrint)
 	ON_COMMAND(ID_FILE_PRINT_DIRECT, &CView::OnFilePrint)
 	ON_COMMAND(ID_FILE_PRINT_PREVIEW, &CobjcontainerView::OnFilePrintPreview)
+	ON_COMMAND(ID_BTNLEFT, &CobjcontainerView::OnLeftTurn)
+	ON_COMMAND(ID_BTNRIGHT, &CobjcontainerView::OnRightTurn)
 	ON_WM_CONTEXTMENU()
 	ON_WM_RBUTTONUP()
 	ON_WM_ERASEBKGND()
@@ -43,6 +45,7 @@ END_MESSAGE_MAP()
 // CobjcontainerView construction/destruction
 
 CobjcontainerView::CobjcontainerView() : m_objModel(NULL)
+									   , m_degRotY(0)
 {
 	// TODO: add construction code here
 
@@ -78,6 +81,8 @@ void DumpMatrix3x3(const glm::mat3& m)
 	}
 }
 
+
+
 // CobjcontainerView drawing
 void CobjcontainerView::OnGLDraw()
 {
@@ -94,7 +99,7 @@ void CobjcontainerView::OnGLDraw()
 		m_model = glm::mat4(1.0f);
 		glm::mat4 xRotMat = glm::rotate(glm::mat4(1.0f), 0.0f, glm::normalize(glm::vec3(glm::inverse(m_model) * glm::vec4(1, 0, 0, 1))) );
 		m_model = m_model * xRotMat;
-		glm::mat4 yRotMat = glm::rotate(glm::mat4(1.0f), 10.0f, glm::normalize(glm::vec3(glm::inverse(m_model) * glm::vec4(0, 1, 0, 1))) );
+		glm::mat4 yRotMat = glm::rotate(glm::mat4(1.0f), m_degRotY, glm::normalize(glm::vec3(glm::inverse(m_model) * glm::vec4(0, 1, 0, 1))) );
 		m_model = m_model * yRotMat;
 
 		glm::mat4 modelViewMatrix = m_view * m_model;
@@ -151,6 +156,7 @@ void CobjcontainerView::OnUpdateGLData()
 		glmVertexNormals(m_objModel, 90.0);
 		// Load the m_model (vertices and normals) into a vertex buffer
 		glmLoadInVBO(m_objModel);
+		m_degRotY = 0;
 		s_filePath = filePath;
 	}
 }
@@ -260,6 +266,18 @@ void CobjcontainerView::OnFilePrintPreview()
 #ifndef SHARED_HANDLERS
 	AFXPrintPreview(this);
 #endif
+}
+
+void CobjcontainerView::OnLeftTurn()
+{
+	m_degRotY -= 0.3146;
+	Invalidate();
+}
+
+void CobjcontainerView::OnRightTurn()
+{
+	m_degRotY += 0.3146;
+	Invalidate();
 }
 
 BOOL CobjcontainerView::OnPreparePrinting(CPrintInfo* pInfo)
