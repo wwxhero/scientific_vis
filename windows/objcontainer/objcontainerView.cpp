@@ -94,7 +94,7 @@ void CobjcontainerView::OnGLDraw()
 		m_model = glm::mat4(1.0f);
 		glm::mat4 xRotMat = glm::rotate(glm::mat4(1.0f), 0.0f, glm::normalize(glm::vec3(glm::inverse(m_model) * glm::vec4(1, 0, 0, 1))) );
 		m_model = m_model * xRotMat;
-		glm::mat4 yRotMat = glm::rotate(glm::mat4(1.0f), 0.0f, glm::normalize(glm::vec3(glm::inverse(m_model) * glm::vec4(0, 1, 0, 1))) );
+		glm::mat4 yRotMat = glm::rotate(glm::mat4(1.0f), 10.0f, glm::normalize(glm::vec3(glm::inverse(m_model) * glm::vec4(0, 1, 0, 1))) );
 		m_model = m_model * yRotMat;
 
 		glm::mat4 modelViewMatrix = m_view * m_model;
@@ -161,8 +161,11 @@ void CobjcontainerView::OnDestroy()
 {
 	CView::OnDestroy();
 	TOpenGLView::OnDestroy();
-	glmDelete(m_objModel);
-	m_objModel = NULL;
+	if (m_objModel)
+	{
+		glmDelete(m_objModel);
+		m_objModel = NULL;
+	}
 }
 void CobjcontainerView::OnUpdate(CView* pSender, LPARAM lHint, CObject* pHint)
 {
