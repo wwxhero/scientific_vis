@@ -177,7 +177,10 @@ int CobjcontainerView::OnGLCreate()
 	//glBindVertexArray(VertexArrayID);
 
 	// Create and compile our GLSL program from the shaders
-	m_programID = LoadShaders( "../shaders/vertShader.glsl", "../shaders/fragShader.glsl" );
+	CString strPath;
+	theApp.GetModuleDirPath(strPath);
+
+	m_programID = LoadShaders( strPath + _T("vertShader.glsl"), strPath + _T("fragShader.glsl" ));
 
 	// Get a handle for our m_model, m_view and projection uniforms
 	m_modelID = glGetUniformLocation(m_programID, "model");

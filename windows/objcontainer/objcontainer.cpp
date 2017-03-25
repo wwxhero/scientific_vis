@@ -60,6 +60,35 @@ CobjcontainerApp theApp;
 
 BOOL CobjcontainerApp::InitInstance()
 {
+	int len = 1024;
+	TCHAR* dir = (TCHAR*)malloc(len * sizeof(TCHAR));
+	bool done = false;
+	do
+	{
+		int expl = GetModuleFileName(NULL, dir, len);
+		done = (expl <= len); //expl + 1 <= len
+		if (!done)
+		{
+			len = expl + 1;
+			dir = (TCHAR*)realloc(dir, len * sizeof(TCHAR));
+		}
+		else
+		{
+			len = expl;
+			dir[len] = _T('\0'); 
+		}
+	}while(!done);
+	ASSERT(len > 1);
+	while(len > 0
+		&& dir[len] != _T('\\'))
+	{
+		len --;
+	}
+	dir[len + 1] = _T('\0');
+	m_strModuleDir = dir;
+
+	free(dir);
+
 	// InitCommonControlsEx() is required on Windows XP if an application
 	// manifest specifies use of ComCtl32.dll version 6 or later to enable
 	// visual styles.  Otherwise, any window creation will fail.
@@ -84,7 +113,7 @@ BOOL CobjcontainerApp::InitInstance()
 
 	EnableTaskbarInteraction(FALSE);
 
-	// AfxInitRichEdit2() is required to use RichEdit control	
+	// AfxInitRichEdit2() is required to use RichEdit control
 	// AfxInitRichEdit2();
 
 	// Standard initialization
@@ -142,6 +171,9 @@ BOOL CobjcontainerApp::InitInstance()
 	//  In an SDI app, this should occur after ProcessShellCommand
 	// Enable drag/drop open
 	m_pMainWnd->DragAcceptFiles();
+
+
+
 	return TRUE;
 }
 
@@ -151,6 +183,11 @@ int CobjcontainerApp::ExitInstance()
 	AfxOleTerm(FALSE);
 
 	return CWinAppEx::ExitInstance();
+}
+
+void CobjcontainerApp::GetModuleDirPath(CString& path)
+{
+	path = m_strModuleDir;
 }
 
 // CobjcontainerApp message handlers

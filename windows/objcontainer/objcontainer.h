@@ -32,9 +32,13 @@ public:
 	virtual void PreLoadState();
 	virtual void LoadCustomState();
 	virtual void SaveCustomState();
+	void GetModuleDirPath(CString& strPath);
 
 	afx_msg void OnAppAbout();
 	DECLARE_MESSAGE_MAP()
+
+private:
+	CString m_strModuleDir;
 };
 
 extern CobjcontainerApp theApp;
