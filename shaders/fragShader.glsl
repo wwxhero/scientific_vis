@@ -2,9 +2,9 @@
 
 
 
-in vec3 fN;
-in vec3 fL;
-in vec3 fE;
+in vec3 vecN;
+in vec3 vecL;
+in vec3 vecE;
 
 // Ouput data
 out vec4 color;
@@ -30,9 +30,9 @@ void main()
   //vec4 AmbientProduct = vec4(0.2, 0.2, 0.2, 1.0);
   //vec4 DiffuseProduct = vec4(0.5, 0.5, 0.5, 1.0);
   //vec4 SpecularProduct = vec4(0.5, 0.5, 0.5, 1.0);
-  vec3 L = normalize(fL);
-  vec3 E = normalize(fE);
-  vec3 N = normalize(fN);
+  vec3 L = normalize(vecL);
+  vec3 E = normalize(vecE);
+  vec3 N = normalize(vecN);
   vec3 H = normalize( L + E );
   vec4 ambient = AmbientProduct;
   color = ambient;

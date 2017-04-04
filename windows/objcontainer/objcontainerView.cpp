@@ -111,7 +111,7 @@ void CobjcontainerView::OnGLDraw()
 		glUniformMatrix4fv(m_modelID, 1, GL_FALSE, &m_model[0][0]);
 		glUniformMatrix4fv(m_viewID, 1, GL_FALSE, &m_view[0][0]);
 		glUniformMatrix4fv(m_projectionID, 1, GL_FALSE, &m_projection[0][0]);
-		glUniformMatrix3fv( glGetUniformLocation(m_programID, "normalMatrix"), 1, GL_FALSE, &normalMatrix[0][0]);
+		glUniformMatrix3fv( glGetUniformLocation(m_programID, "model2view"), 1, GL_FALSE, &normalMatrix[0][0]);
 
 		glmDrawVBO(m_objModel, m_programID);
 
@@ -203,9 +203,9 @@ int CobjcontainerView::OnGLCreate()
 	m_programID = LoadShaders( strPath + _T("vertShader.glsl"), strPath + _T("fragShader.glsl" ));
 
 	// Get a handle for our m_model, m_view and projection uniforms
-	m_modelID = glGetUniformLocation(m_programID, "model");
-	m_viewID = glGetUniformLocation(m_programID, "view");
-	m_projectionID = glGetUniformLocation(m_programID, "projection");
+	m_modelID = glGetUniformLocation(m_programID, "model2world");
+	m_viewID = glGetUniformLocation(m_programID, "world2view");
+	m_projectionID = glGetUniformLocation(m_programID, "view2clip");
 
 	glm::vec4 light_ambient = glm::vec4( 0.1, 0.1, 0.1, 0.5 );
 	glm::vec4 light_diffuse = glm::vec4 ( 0.8, 1.0, 1.0, 1.0 );

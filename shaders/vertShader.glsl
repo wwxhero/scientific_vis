@@ -7,26 +7,26 @@ layout(location = 1) in vec3 vertexNormal; //direction of normal
 
 
 // Values that stay constant for the whole mesh.
-uniform mat4 model;
-uniform mat4 view;
-uniform mat4 projection;
-uniform mat3 normalMatrix;
+uniform mat4 model2world;
+uniform mat4 world2view;
+uniform mat4 view2clip;
+uniform mat3 model2view;
 
 uniform vec4 lightPos;
 
-out vec3 fN;
-out vec3 fE;
-out vec3 fL;
+out vec3 vecN;
+out vec3 vecE;
+out vec3 vecL;
 
 void main()
 {
-  vec3 pos = (view * model * vec4(vertexPosition,1)).xyz;
-  fN = normalize(normalMatrix * vertexNormal);
-  fL = -(view * lightPos).xyz;
-  fE = -pos;
+  vec3 pos = (world2view * model2world * vec4(vertexPosition,1)).xyz;
+  vecN = normalize(model2view * vertexNormal);
+  vecL = -(world2view * lightPos).xyz;
+  vecE = -pos;
   // Output position of the vertex, in clip space : MVP * position
 
-  gl_Position =  projection * view * model * vec4(vertexPosition,1);
+  gl_Position =  view2clip * world2view * model2world * vec4(vertexPosition,1);
 
 }
 
