@@ -4,7 +4,7 @@
 
 in vec3 vecN;
 in vec3 vecL;
-in vec3 vecE;
+in vec3 vecP;
 
 // Ouput data
 out vec4 color;
@@ -30,18 +30,18 @@ void main()
   //vec4 AmbientProduct = vec4(0.2, 0.2, 0.2, 1.0);
   //vec4 DiffuseProduct = vec4(0.5, 0.5, 0.5, 1.0);
   //vec4 SpecularProduct = vec4(0.5, 0.5, 0.5, 1.0);
-  vec3 L = normalize(vecL);
-  vec3 E = normalize(vecE);
-  vec3 N = normalize(vecN);
-  vec3 H = normalize( L + E );
+  vec3 dirL = normalize(vecL);
+  vec3 dirP = normalize(vecP);
+  vec3 dirN = normalize(vecN);
+  vec3 dirH = normalize( dirL + dirP );
   vec4 ambient = AmbientProduct;
   color = ambient;
-  float Kd = max(dot(L, N), 0.0);
+  float Kd = max(dot(dirL, dirN), 0.0);
   vec4 diffuse = Kd*DiffuseProduct;
-  float Ks = pow(max(dot(N, H), 0.0), 6.0);
+  float Ks = pow(max(dot(dirN, dirH), 0.0), 6.0);
   vec4 specular = Ks*SpecularProduct;
-  float coeficient_s = max(0, dot(L, N));
-  coeficient_s = normalize(coeficient_s);
+  float coeficient_s = max(0, dot(dirL, dirN));
+  coeficient_s = normalize(coeficient_s); //coeficent_s = [0, 1]
   specular = coeficient_s * specular;
   color +=diffuse + specular;
 

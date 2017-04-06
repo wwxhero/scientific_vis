@@ -22,7 +22,6 @@
 #define new DEBUG_NEW
 #endif
 
-
 // CobjcontainerView
 
 IMPLEMENT_DYNCREATE(CobjcontainerView, CView)
@@ -34,6 +33,7 @@ BEGIN_MESSAGE_MAP(CobjcontainerView, CView)
 	ON_COMMAND(ID_FILE_PRINT_PREVIEW, &CobjcontainerView::OnFilePrintPreview)
 	ON_COMMAND(ID_BTNLEFT, &CobjcontainerView::OnLeftTurn)
 	ON_COMMAND(ID_BTNRIGHT, &CobjcontainerView::OnRightTurn)
+	ON_COMMAND(ID_EDIT_SNAPSHOT, &CobjcontainerView::OnSnapShot)
 	ON_WM_CONTEXTMENU()
 	ON_WM_RBUTTONUP()
 	ON_WM_ERASEBKGND()
@@ -278,6 +278,11 @@ void CobjcontainerView::OnRightTurn()
 {
 	m_degRotY += 0.3146;
 	Invalidate();
+}
+
+void CobjcontainerView::OnSnapShot()
+{
+	DumpSnapShot();
 }
 
 BOOL CobjcontainerView::OnPreparePrinting(CPrintInfo* pInfo)
