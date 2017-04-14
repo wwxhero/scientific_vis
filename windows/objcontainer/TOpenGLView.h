@@ -143,9 +143,6 @@ protected:
 		CDC *pDC = pThis->GetDC();
 		HDC hDC = pDC->m_hDC;
 		wglMakeCurrent(hDC, m_hrc);
-
-		cx --;
-		cy --;
 		if (cx > 0 && cy > 0)
 		{
 			glViewport(0, 0, cx, cy);
@@ -180,10 +177,14 @@ protected:
 			   && m_szCln.cy > 0)
 			{
 				const int c_numChannels = 3;
-				unsigned char* imageData = (unsigned char *)malloc((int)(m_szCln.cx * m_szCln.cy * c_numChannels));
+				unsigned char* imageData = (unsigned char *)malloc(m_szCln.cx * m_szCln.cy * c_numChannels);
 				//pixels read by this function is a pixel less in width and in height, or this function call will crash
 				//can't explain the reason
-				glReadPixels(0, 0, m_szCln.cx, m_szCln.cy, GL_RGB, GL_UNSIGNED_BYTE,  imageData);
+				GLint Pack;
+				glGetIntegerv(GL_PACK_ALIGNMENT, &Pack);
+				glPixelStorei(GL_PACK_ALIGNMENT, 1);
+				glReadPixels(0, 0, m_szCln.cx, m_szCln.cy, GL_RGB, GL_UNSIGNED_BYTE, imageData);
+				glPixelStorei(GL_PACK_ALIGNMENT, Pack);
 				SaveBitmap(m_szCln.cx, m_szCln.cy, imageData);
 				free(imageData);
 			}
