@@ -13,6 +13,8 @@
 
 #include <propkey.h>
 
+#include "Object3D.h"
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
@@ -58,11 +60,29 @@ void CobjcontainerDoc::Serialize(CArchive& ar)
 	if (ar.IsStoring())
 	{
 		// TODO: add storing code here
+#ifdef TEST_SIERALIZATION
+		srand(::GetTickCount());
+		CObject3D *pObj = new CObject3D();
+		m_arrObjs.Add(pObj);
+		CObject3D *pObj2 = new CObject3D();
+		m_arrObjs.Add(pObj2);
+		m_arrObjs.Serialize(ar);
+		m_arrObjs.RemoveAll();
+		delete pObj;
+		delete pObj2;
+#endif
 	}
 	else
 	{
-		// TODO: add loading code here
+#ifdef TEST_SIERALIZATION
+		m_arrObjs.Serialize(ar);
+		INT_PTR sz = m_arrObjs.GetSize();
+		for (INT_PTR i = 0; i < sz; i ++)
+			delete m_arrObjs.GetAt(i);
+		m_arrObjs.RemoveAll();
+#endif
 	}
+
 }
 
 #ifdef SHARED_HANDLERS

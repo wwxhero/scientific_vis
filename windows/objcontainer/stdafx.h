@@ -36,6 +36,7 @@
 #endif // _AFX_NO_AFXCMN_SUPPORT
 
 #include <afxcontrolbars.h>     // MFC support for ribbons and control bars
+#include <afx.h>
 
 
 
@@ -56,3 +57,9 @@
 #endif
 
 
+#include <glm/glm.hpp>
+typedef float Real;
+typedef glm::tmat4x4<Real> Matrix4x4;
+typedef glm::tvec4<Real> Vector4;
+
+#define TEST_SIERALIZATION
