@@ -176,7 +176,7 @@ void CobjcontainerView::OnDestroy()
 void CobjcontainerView::OnUpdate(CView* pSender, LPARAM lHint, CObject* pHint)
 {
 	CView::OnUpdate(pSender, lHint, pHint);
-	UpdateGLData();
+	//UpdateGLData();
 }
 
 int CobjcontainerView::OnGLCreate()

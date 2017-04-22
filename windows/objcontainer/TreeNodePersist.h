@@ -44,7 +44,6 @@ public:
 				ar << m_idx[i];
 #ifdef TEST_SIERALIZATION
 			ar << m_id;
-			TRACE(_T("Saving ids: %d %d %d %d\n"), m_idx[0], m_idx[1], m_idx[2], m_idx[3]);
 #endif
 		}
 		else
@@ -53,7 +52,6 @@ public:
 				ar >> m_idx[i];
 #ifdef TEST_SIERALIZATION
 			ar >> m_id;
-			TRACE(_T("Restoring ids: %d %d %d %d\n"), m_idx[0], m_idx[1], m_idx[2], m_idx[3]);
 #endif
 		}
 	}

@@ -4,7 +4,7 @@
 
 
 #pragma once
-
+#include "Scene.h"
 
 class CobjcontainerDoc : public CDocument
 {
@@ -35,6 +35,11 @@ public:
 	virtual void Dump(CDumpContext& dc) const;
 #endif
 
+	CObject3D* RootObj()
+	{
+		return &m_scene;
+	}
+
 protected:
 
 // Generated message map functions
@@ -54,4 +59,7 @@ private:
 	void TestBasicSerialization(CArchive& ar);
 	void TestTreeSerialization(CArchive& ar);
 #endif
+
+
+	CScene m_scene;
 };

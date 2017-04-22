@@ -4,6 +4,7 @@
 #include "ClassView.h"
 #include "Resource.h"
 #include "objcontainer.h"
+#include "objcontainerDoc.h"
 
 class CClassViewMenuButton : public CMFCToolBarMenuButton
 {
@@ -58,13 +59,22 @@ BEGIN_MESSAGE_MAP(CClassView, CDockablePane)
 	ON_WM_SETFOCUS()
 	ON_COMMAND_RANGE(ID_SORTING_GROUPBYTYPE, ID_SORTING_SORTBYACCESS, OnSort)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_SORTING_GROUPBYTYPE, ID_SORTING_SORTBYACCESS, OnUpdateSort)
+	ON_MESSAGE(WM_INITIALUPDATE, OnInitialUpdate)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
 // CClassView message handlers
 
+LRESULT CClassView::OnInitialUpdate(WPARAM wParam, LPARAM lParam)
+{
+	// Fill in some static tree view data (dummy code, nothing magic here)
+	FillClassView();
+	return 0;
+}
+
 int CClassView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 {
+
 	if (CDockablePane::OnCreate(lpCreateStruct) == -1)
 		return -1;
 
@@ -109,8 +119,7 @@ int CClassView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		pButton->SetMessageWnd(this);
 	}
 
-	// Fill in some static tree view data (dummy code, nothing magic here)
-	FillClassView();
+
 
 	return 0;
 }
@@ -123,7 +132,40 @@ void CClassView::OnSize(UINT nType, int cx, int cy)
 
 void CClassView::FillClassView()
 {
-	HTREEITEM hRoot = m_wndClassView.InsertItem(_T("VisObjects"), 0, 0);
+	m_wndClassView.DeleteAllItems();
+
+	CMainFrame* pFrame = (CMainFrame*)AfxGetMainWnd();
+	CobjcontainerDoc* pDoc = (CobjcontainerDoc*)(pFrame->GetActiveDocument());
+
+	CObject3D* root = pDoc->RootObj();
+	UINT uMask = TVIF_IMAGE|TVIF_PARAM|TVIF_SELECTEDIMAGE|TVIF_TEXT;
+	const CString& str = root->GetName();
+	int nImg = 0;
+	int nSelectedImg = 0;
+	UINT nState = TVIS_BOLD;
+	UINT nStateMask = TVIS_BOLD;
+	LPARAM lParam = (LPARAM)root;
+	HTREEITEM hParent = NULL;
+	HTREEITEM hInsertAfter = NULL;
+
+	HTREEITEM hRoot = m_wndClassView.InsertItem(
+										uMask
+										, str
+										, nImg
+										, nSelectedImg
+										, nState
+										, nStateMask
+										, lParam
+										, hParent
+										, hInsertAfter);
+
+	//std::stack<CObject3D*> stkObjs;
+	//std::stack<HTREEITEM
+
+
+
+
+	/*HTREEITEM hRoot = m_wndClassView.InsertItem(_T("VisObjects"), 0, 0);
 	m_wndClassView.SetItemState(hRoot, TVIS_BOLD, TVIS_BOLD);
 
 	HTREEITEM hClass = m_wndClassView.InsertItem(_T("3d Objects"), 1, 1, hRoot);
@@ -131,7 +173,7 @@ void CClassView::FillClassView()
 
 	m_wndClassView.Expand(hRoot, TVE_EXPAND);
 
-	hClass = m_wndClassView.InsertItem(_T("2d Objects"), 1, 1, hRoot);
+	hClass = m_wndClassView.InsertItem(_T("2d Objects"), 1, 1, hRoot);*/
 }
 
 void CClassView::OnContextMenu(CWnd* pWnd, CPoint point)
