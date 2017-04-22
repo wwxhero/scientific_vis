@@ -6,5 +6,9 @@ class CScene :
 public:
 	CScene(void);
 	virtual ~CScene(void);
+	virtual void GetName(CString& strName) const
+	{
+		strName = _T("Scene");
+	}
 };
 

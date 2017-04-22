@@ -1,8 +1,8 @@
 
 #include "stdafx.h"
 #include "MainFrm.h"
-#include "ClassView.h"
 #include "Resource.h"
+#include "ClassView.h"
 #include "objcontainer.h"
 #include "objcontainerDoc.h"
 
@@ -72,6 +72,31 @@ LRESULT CClassView::OnInitialUpdate(WPARAM wParam, LPARAM lParam)
 	return 0;
 }
 
+BOOL CClassView::OnNotify(WPARAM wParam, LPARAM lParam, LRESULT* pResult)
+{
+	if (wParam == ID_TREEVIEW)
+	{
+		NMHDR* pNMHDR = (NMHDR*)lParam;
+		ASSERT(pNMHDR != NULL);
+		if (pNMHDR && pNMHDR->code == TVN_SELCHANGED)
+		{
+			HTREEITEM hItem = m_wndClassView.GetSelectedItem();
+			TVITEM item;
+			item.mask = TVIF_PARAM;
+			item.hItem = hItem;
+			m_wndClassView.GetItem(&item);
+			if (item.lParam)
+			{
+				CObject3D* pObj = (CObject3D *)(item.lParam);
+				CobjcontainerDoc* pDoc = GetDocument();
+				pDoc->SelectObj(pObj, this);
+			}
+
+		}
+	}
+	return CDockablePane::OnNotify(wParam, lParam, pResult);
+}
+
 int CClassView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 {
 
@@ -84,7 +109,7 @@ int CClassView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	// Create views:
 	const DWORD dwViewStyle = WS_CHILD | WS_VISIBLE | TVS_HASLINES | TVS_LINESATROOT | TVS_HASBUTTONS | WS_CLIPSIBLINGS | WS_CLIPCHILDREN;
 
-	if (!m_wndClassView.Create(dwViewStyle, rectDummy, this, 2))
+	if (!m_wndClassView.Create(dwViewStyle, rectDummy, this, ID_TREEVIEW))
 	{
 		TRACE0("Failed to create Class View\n");
 		return -1;      // fail to create
@@ -130,16 +155,23 @@ void CClassView::OnSize(UINT nType, int cx, int cy)
 	AdjustLayout();
 }
 
+CobjcontainerDoc* CClassView::GetDocument()
+{
+	CMainFrame* pFrame = (CMainFrame*)AfxGetMainWnd();
+	CobjcontainerDoc* pDoc = (CobjcontainerDoc*)(pFrame->GetActiveDocument());
+	return pDoc;
+}
+
 void CClassView::FillClassView()
 {
 	m_wndClassView.DeleteAllItems();
 
-	CMainFrame* pFrame = (CMainFrame*)AfxGetMainWnd();
-	CobjcontainerDoc* pDoc = (CobjcontainerDoc*)(pFrame->GetActiveDocument());
+	CobjcontainerDoc* pDoc = GetDocument();
 
 	CObject3D* root = pDoc->RootObj();
 	UINT uMask = TVIF_IMAGE|TVIF_PARAM|TVIF_SELECTEDIMAGE|TVIF_TEXT;
-	const CString& str = root->GetName();
+	CString str;
+	root->GetName(str);
 	int nImg = 0;
 	int nSelectedImg = 0;
 	UINT nState = TVIS_BOLD;
@@ -158,11 +190,10 @@ void CClassView::FillClassView()
 										, lParam
 										, hParent
 										, hInsertAfter);
+	//todo: a generic tree construction algorithm
 
 	//std::stack<CObject3D*> stkObjs;
 	//std::stack<HTREEITEM
-
-
 
 
 	/*HTREEITEM hRoot = m_wndClassView.InsertItem(_T("VisObjects"), 0, 0);

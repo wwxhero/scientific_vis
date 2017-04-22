@@ -40,6 +40,13 @@ public:
 		return &m_scene;
 	}
 
+	void SelectObj(CObject3D* pObj, CWnd* pSender)
+	{
+		CString strName;
+		pObj->GetName(strName);
+		TRACE(_T("%s selected\n"), strName);
+	}
+
 protected:
 
 // Generated message map functions

@@ -20,6 +20,10 @@ public:
 	{
 		return m_nextSibbling;
 	}
+	virtual void GetName(CString& strName) const
+	{
+		strName = _T("Generic 3D Object");
+	}
 private:
 	virtual void Serialize(CArchive& ar);
 

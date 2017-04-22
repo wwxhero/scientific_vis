@@ -2,6 +2,8 @@
 #pragma once
 
 #include "ViewTree.h"
+#include "Resource.h"
+#include "objcontainerDoc.h"
 
 class CClassToolBar : public CMFCToolBar
 {
@@ -27,13 +29,14 @@ protected:
 	CViewTree m_wndClassView;
 	CImageList m_ClassViewImages;
 	UINT m_nCurrSort;
-
+	enum {ID_TREEVIEW = 1, ID_TOOLBAR = IDR_SORT};
 	void FillClassView();
+	CobjcontainerDoc* GetDocument();
 
 // Overrides
 public:
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
-
+	virtual BOOL OnNotify(WPARAM wParam, LPARAM lParam, LRESULT* pResult);
 protected:
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	afx_msg void OnSize(UINT nType, int cx, int cy);
