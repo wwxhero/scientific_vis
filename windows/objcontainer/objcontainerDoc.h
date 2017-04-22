@@ -41,11 +41,17 @@ protected:
 protected:
 	DECLARE_MESSAGE_MAP()
 
+
+
 #ifdef SHARED_HANDLERS
 	// Helper function that sets search content for a Search Handler
 	void SetSearchContent(const CString& value);
 #endif // SHARED_HANDLERS
 
 private:
-	CObArray m_arrObjs;
+
+#ifdef TEST_SIERALIZATION
+	void TestBasicSerialization(CArchive& ar);
+	void TestTreeSerialization(CArchive& ar);
+#endif
 };

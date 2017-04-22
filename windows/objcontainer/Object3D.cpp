@@ -11,6 +11,9 @@ IMPLEMENT_SERIAL(CObject3D, CObject, 1)
 CObject3D::CObject3D()
 	: m_local2parent(1.0f)
 	, m_parent2local(1.0f)
+	, m_parent(NULL)
+	, m_firstChild(NULL)
+	, m_nextSibbling(NULL)
 {
 #ifdef TEST_SIERALIZATION
 	for (int c = 0; c < 4; c ++)
@@ -43,14 +46,7 @@ void CObject3D::Serialize(CArchive& ar)
 				ar >> e;
 		}
 	}
-
-#ifdef TEST_SIERALIZATION
-	if (storing)
-		TRACE(_T("Storing...\n"));
-	else
-		TRACE(_T("Loading...\n"));
-	DumpData();
-#endif
+	CTreeNodePersist::Serialize(ar);
 }
 
 void CObject3D::DumpData()
@@ -64,5 +60,14 @@ void CObject3D::DumpData()
 		TRACE(_T("%2.0f %2.0f %2.0f %2.0f\n"), v0[r], v1[r], v2[r], v3[r]);
 	}
 }
+
+void CObject3D::AddChild(CObject3D* child)
+{
+	child->m_nextSibbling = m_firstChild;
+	m_firstChild = child;
+	child->m_parent = this;
+}
+
+
 
 // CObject3D member functions

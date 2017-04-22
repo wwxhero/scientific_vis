@@ -14,6 +14,7 @@
 #include <propkey.h>
 
 #include "Object3D.h"
+#include <queue>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -57,33 +58,165 @@ BOOL CobjcontainerDoc::OnNewDocument()
 
 void CobjcontainerDoc::Serialize(CArchive& ar)
 {
+#ifdef TEST_SIERALIZATION
+	//TestBasicSerialization(ar);
+	TestTreeSerialization(ar);
+#endif
+}
+
+#ifdef TEST_SIERALIZATION
+void CobjcontainerDoc::TestBasicSerialization(CArchive& ar)
+{
+	CObArray arrObjs;
 	if (ar.IsStoring())
 	{
 		// TODO: add storing code here
-#ifdef TEST_SIERALIZATION
+		TRACE(_T("Storing...\n"));
 		srand(::GetTickCount());
 		CObject3D *pObj = new CObject3D();
-		m_arrObjs.Add(pObj);
+		arrObjs.Add(pObj);
 		CObject3D *pObj2 = new CObject3D();
-		m_arrObjs.Add(pObj2);
-		m_arrObjs.Serialize(ar);
-		m_arrObjs.RemoveAll();
+		arrObjs.Add(pObj2);
+		arrObjs.Serialize(ar);
+		arrObjs.RemoveAll();
+		pObj->DumpData();
+		pObj2->DumpData();
 		delete pObj;
 		delete pObj2;
-#endif
 	}
 	else
 	{
-#ifdef TEST_SIERALIZATION
-		m_arrObjs.Serialize(ar);
-		INT_PTR sz = m_arrObjs.GetSize();
+		TRACE(_T("Loading...\n"));
+		arrObjs.Serialize(ar);
+		INT_PTR sz = arrObjs.GetSize();
 		for (INT_PTR i = 0; i < sz; i ++)
-			delete m_arrObjs.GetAt(i);
-		m_arrObjs.RemoveAll();
-#endif
+		{
+			CObject *pObj = arrObjs.GetAt(i);
+			ASSERT(pObj->IsKindOf(RUNTIME_CLASS(CObject3D)));
+			(static_cast<CObject3D*>(pObj))->DumpData();
+			delete pObj;
+		}
+		arrObjs.RemoveAll();
 	}
-
 }
+
+void CobjcontainerDoc::TestTreeSerialization(CArchive& ar)
+{
+	CObArray arrObjs;
+	if (ar.IsStoring())
+	{
+		TRACE(_T("Storing Tree...\n"));
+		const int c_nullIdx = -1;
+		struct stNode {
+			int id;
+			int left;
+			int right;
+			CObject3D* obj;
+		} nodes [] = {
+			{0, 1, 2, NULL}
+			, {1, 3, 4, NULL}
+			, {2, c_nullIdx, c_nullIdx, NULL}
+			, {3, c_nullIdx, c_nullIdx, NULL}
+			, {4, c_nullIdx, c_nullIdx, NULL}
+		};
+
+		TRACE(_T("Source tree...\n"));
+		std::queue<stNode*> tq;
+		CObject3D* root = new CObject3D();
+		root->setNodeId(nodes[0].id);
+		nodes[0].obj = root;
+		tq.push(&nodes[0]);
+		while(!tq.empty())
+		{
+			stNode* n = tq.front();
+			tq.pop();
+			TRACE(_T("%d: %d %d\n"), n->id, n->left, n->right);
+
+			int iChildren[] = {n->left, n->right};
+			CObject3D* nP = n->obj;
+			for (int ic = 0; ic < sizeof(iChildren)/sizeof(int); ic ++)
+			{
+				if (c_nullIdx != iChildren[ic])
+				{
+					CObject3D* nC = new CObject3D();
+					nC->setNodeId(nodes[iChildren[ic]].id);
+					nodes[iChildren[ic]].obj = nC;
+					nP->AddChild(nC);
+					tq.push(&nodes[iChildren[ic]]);
+				}
+			}
+		}
+
+		TRACE(_T("Destination tree...\n"));
+		std::queue<CObject3D*> tq2;
+		tq2.push(root);
+		CObArray poolObjs;
+		while(!tq2.empty())
+		{
+			CObject3D* n = tq2.front();
+			tq2.pop();
+			TRACE(_T("%d:"), n->getNodeId());
+			CObject3D* c = n->GetFirstChild();
+			while (c)
+			{
+				TRACE(_T(" %d"), c->getNodeId());
+				tq2.push(c);
+				c = c->GetNextSibbling();
+			}
+			TRACE(_T("\n"));
+			n->SaveTreeNode(poolObjs);
+		}
+		poolObjs.Serialize(ar);
+		for (int i = 0; i < poolObjs.GetCount(); i ++)
+		{
+			CObject* obj = poolObjs.GetAt(i);
+			delete obj;
+		}
+		poolObjs.RemoveAll();
+	}
+	else
+	{
+		TRACE(_T("Loading Tree...\n"));
+		CObArray poolObjs;
+		poolObjs.Serialize(ar);
+		if (!poolObjs.IsEmpty())
+		{
+			CObject* pObj = poolObjs.GetAt(0);
+			ASSERT(pObj->IsKindOf(RUNTIME_CLASS(CObject3D)));
+			CObject3D* root = static_cast<CObject3D*>(pObj);
+			for (int i = 0; i < poolObjs.GetCount(); i ++)
+			{
+				pObj = poolObjs.GetAt(i);
+				ASSERT(pObj->IsKindOf(RUNTIME_CLASS(CObject3D)));
+				CObject3D* node = static_cast<CObject3D*>(pObj);
+				node->RestoreTreeNode(poolObjs);
+			}
+
+			std::queue<CObject3D*> tq;
+			tq.push(root);
+			while(!tq.empty())
+			{
+				CObject3D* n = tq.front();
+				tq.pop();
+				TRACE(_T("%d:"), n->getNodeId());
+				CObject3D* c = n->GetFirstChild();
+				while (c)
+				{
+					TRACE(_T(" %d"), c->getNodeId());
+					tq.push(c);
+					c = c->GetNextSibbling();
+				}
+				TRACE(_T("\n"));
+			}
+
+			for (int i = 0; i < poolObjs.GetCount(); i ++)
+				delete poolObjs.GetAt(i);
+			poolObjs.RemoveAll();
+		}
+	}
+}
+
+#endif
 
 #ifdef SHARED_HANDLERS
 
