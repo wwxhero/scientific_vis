@@ -36,6 +36,7 @@ BEGIN_MESSAGE_MAP(CPropertiesWnd, CDockablePane)
 	ON_UPDATE_COMMAND_UI(ID_PROPERTIES2, OnUpdateProperties2)
 	ON_WM_SETFOCUS()
 	ON_WM_SETTINGCHANGE()
+	ON_MESSAGE(WM_INITIALUPDATE, OnInitialUpdate)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -60,6 +61,19 @@ void CPropertiesWnd::AdjustLayout()
 	m_wndToolBar.SetWindowPos(NULL, rectClient.left, rectClient.top + cyCmb, rectClient.Width(), cyTlb, SWP_NOACTIVATE | SWP_NOZORDER);
 	m_wndPropList.SetWindowPos(NULL, rectClient.left, rectClient.top + cyCmb + cyTlb, rectClient.Width(), rectClient.Height() -(cyCmb+cyTlb), SWP_NOACTIVATE | SWP_NOZORDER);
 }
+
+void CPropertiesWnd::OnUpdate(CWnd* pSender, CobjcontainerDoc::OP op, CObject3D* obj)
+{
+	TRACE(_T("CPropertiesWnd::OnUpdate\n"));
+}
+
+LRESULT CPropertiesWnd::OnInitialUpdate(WPARAM, LPARAM)
+{
+	CobjcontainerDoc* pDoc = GetDocument();
+	pDoc->RegisterView(this);
+	return 0;
+}
+
 
 int CPropertiesWnd::OnCreate(LPCREATESTRUCT lpCreateStruct)
 {

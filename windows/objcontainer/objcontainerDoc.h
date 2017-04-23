@@ -4,8 +4,9 @@
 
 
 #pragma once
+#include <list>
 #include "Scene.h"
-
+class CViewPane;
 class CobjcontainerDoc : public CDocument
 {
 protected: // create from serialization only
@@ -14,7 +15,7 @@ protected: // create from serialization only
 
 // Attributes
 public:
-
+	enum OP {OP_SEL = 0 };
 // Operations
 public:
 
@@ -42,9 +43,21 @@ public:
 
 	void SelectObj(CObject3D* pObj, CWnd* pSender)
 	{
-		CString strName;
-		pObj->GetName(strName);
-		TRACE(_T("%s selected\n"), strName);
+		UpdateAllViews(pSender, OP_SEL,	pObj);
+	}
+
+	void UpdateAllViews(CWnd* pSender, OP op, CObject3D* pHint);
+	void RegisterView(CViewPane* pView)
+	{
+		bool registered = false;
+		for(std::list<CViewPane*>::iterator it = m_lstViews.begin()\
+			; !registered && it != m_lstViews.end()
+			; it ++)
+		{
+			registered = (*it == pView);
+		}
+		if (!registered)
+			m_lstViews.push_back(pView);
 	}
 
 protected:
@@ -69,4 +82,5 @@ private:
 
 
 	CScene m_scene;
+	std::list<CViewPane*> m_lstViews;
 };

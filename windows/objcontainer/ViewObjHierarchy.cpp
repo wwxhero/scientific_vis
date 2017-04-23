@@ -2,13 +2,13 @@
 #include "stdafx.h"
 #include "MainFrm.h"
 #include "Resource.h"
-#include "ClassView.h"
+#include "ViewObjHierarchy.h"
 #include "objcontainer.h"
 #include "objcontainerDoc.h"
 
 class CClassViewMenuButton : public CMFCToolBarMenuButton
 {
-	friend class CClassView;
+	friend class CViewObjHierarchy;
 
 	DECLARE_SERIAL(CClassViewMenuButton)
 
@@ -37,16 +37,16 @@ IMPLEMENT_SERIAL(CClassViewMenuButton, CMFCToolBarMenuButton, 1)
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CClassView::CClassView()
+CViewObjHierarchy::CViewObjHierarchy()
 {
 	m_nCurrSort = ID_SORTING_GROUPBYTYPE;
 }
 
-CClassView::~CClassView()
+CViewObjHierarchy::~CViewObjHierarchy()
 {
 }
 
-BEGIN_MESSAGE_MAP(CClassView, CDockablePane)
+BEGIN_MESSAGE_MAP(CViewObjHierarchy, CDockablePane)
 	ON_WM_CREATE()
 	ON_WM_SIZE()
 	ON_WM_CONTEXTMENU()
@@ -63,16 +63,29 @@ BEGIN_MESSAGE_MAP(CClassView, CDockablePane)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
-// CClassView message handlers
+// CViewObjHierarchy message handlers
 
-LRESULT CClassView::OnInitialUpdate(WPARAM wParam, LPARAM lParam)
+LRESULT CViewObjHierarchy::OnInitialUpdate(WPARAM wParam, LPARAM lParam)
 {
 	// Fill in some static tree view data (dummy code, nothing magic here)
-	FillClassView();
+	FillObjHierarchy();
+	CobjcontainerDoc* pDoc = GetDocument();
+	pDoc->RegisterView(this);
 	return 0;
 }
 
-BOOL CClassView::OnNotify(WPARAM wParam, LPARAM lParam, LRESULT* pResult)
+void CViewObjHierarchy::OnUpdate(CWnd* pSender, CobjcontainerDoc::OP op, CObject3D* pObj)
+{
+	if (this == pSender)
+		return;
+	else
+	{
+		//todo: a tree traverse algorithm for the op
+	}
+}
+
+
+BOOL CViewObjHierarchy::OnNotify(WPARAM wParam, LPARAM lParam, LRESULT* pResult)
 {
 	if (wParam == ID_TREEVIEW)
 	{
@@ -85,19 +98,15 @@ BOOL CClassView::OnNotify(WPARAM wParam, LPARAM lParam, LRESULT* pResult)
 			item.mask = TVIF_PARAM;
 			item.hItem = hItem;
 			m_wndClassView.GetItem(&item);
-			if (item.lParam)
-			{
-				CObject3D* pObj = (CObject3D *)(item.lParam);
-				CobjcontainerDoc* pDoc = GetDocument();
-				pDoc->SelectObj(pObj, this);
-			}
-
+			CObject3D* pObj = (CObject3D *)(item.lParam);
+			CobjcontainerDoc* pDoc = GetDocument();
+			pDoc->SelectObj(pObj, this);
 		}
 	}
 	return CDockablePane::OnNotify(wParam, lParam, pResult);
 }
 
-int CClassView::OnCreate(LPCREATESTRUCT lpCreateStruct)
+int CViewObjHierarchy::OnCreate(LPCREATESTRUCT lpCreateStruct)
 {
 
 	if (CDockablePane::OnCreate(lpCreateStruct) == -1)
@@ -149,20 +158,15 @@ int CClassView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	return 0;
 }
 
-void CClassView::OnSize(UINT nType, int cx, int cy)
+void CViewObjHierarchy::OnSize(UINT nType, int cx, int cy)
 {
 	CDockablePane::OnSize(nType, cx, cy);
 	AdjustLayout();
 }
 
-CobjcontainerDoc* CClassView::GetDocument()
-{
-	CMainFrame* pFrame = (CMainFrame*)AfxGetMainWnd();
-	CobjcontainerDoc* pDoc = (CobjcontainerDoc*)(pFrame->GetActiveDocument());
-	return pDoc;
-}
 
-void CClassView::FillClassView()
+
+void CViewObjHierarchy::FillObjHierarchy()
 {
 	m_wndClassView.DeleteAllItems();
 
@@ -207,7 +211,7 @@ void CClassView::FillClassView()
 	hClass = m_wndClassView.InsertItem(_T("2d Objects"), 1, 1, hRoot);*/
 }
 
-void CClassView::OnContextMenu(CWnd* pWnd, CPoint point)
+void CViewObjHierarchy::OnContextMenu(CWnd* pWnd, CPoint point)
 {
 	CTreeCtrl* pWndTree = (CTreeCtrl*)&m_wndClassView;
 	ASSERT_VALID(pWndTree);
@@ -250,7 +254,7 @@ void CClassView::OnContextMenu(CWnd* pWnd, CPoint point)
 	}
 }
 
-void CClassView::AdjustLayout()
+void CViewObjHierarchy::AdjustLayout()
 {
 	if (GetSafeHwnd() == NULL)
 	{
@@ -266,12 +270,12 @@ void CClassView::AdjustLayout()
 	m_wndClassView.SetWindowPos(NULL, rectClient.left + 1, rectClient.top + cyTlb + 1, rectClient.Width() - 2, rectClient.Height() - cyTlb - 2, SWP_NOACTIVATE | SWP_NOZORDER);
 }
 
-BOOL CClassView::PreTranslateMessage(MSG* pMsg)
+BOOL CViewObjHierarchy::PreTranslateMessage(MSG* pMsg)
 {
 	return CDockablePane::PreTranslateMessage(pMsg);
 }
 
-void CClassView::OnSort(UINT id)
+void CViewObjHierarchy::OnSort(UINT id)
 {
 	if (m_nCurrSort == id)
 	{
@@ -290,37 +294,37 @@ void CClassView::OnSort(UINT id)
 	}
 }
 
-void CClassView::OnUpdateSort(CCmdUI* pCmdUI)
+void CViewObjHierarchy::OnUpdateSort(CCmdUI* pCmdUI)
 {
 	pCmdUI->SetCheck(pCmdUI->m_nID == m_nCurrSort);
 }
 
-void CClassView::OnClassAddMemberFunction()
+void CViewObjHierarchy::OnClassAddMemberFunction()
 {
 	AfxMessageBox(_T("Add member function..."));
 }
 
-void CClassView::OnClassAddMemberVariable()
+void CViewObjHierarchy::OnClassAddMemberVariable()
 {
 	// TODO: Add your command handler code here
 }
 
-void CClassView::OnClassDefinition()
+void CViewObjHierarchy::OnClassDefinition()
 {
 	// TODO: Add your command handler code here
 }
 
-void CClassView::OnClassProperties()
+void CViewObjHierarchy::OnClassProperties()
 {
 	// TODO: Add your command handler code here
 }
 
-void CClassView::OnNewFolder()
+void CViewObjHierarchy::OnNewFolder()
 {
 	AfxMessageBox(_T("New Folder..."));
 }
 
-void CClassView::OnPaint()
+void CViewObjHierarchy::OnPaint()
 {
 	CPaintDC dc(this); // device context for painting
 
@@ -332,14 +336,14 @@ void CClassView::OnPaint()
 	dc.Draw3dRect(rectTree, ::GetSysColor(COLOR_3DSHADOW), ::GetSysColor(COLOR_3DSHADOW));
 }
 
-void CClassView::OnSetFocus(CWnd* pOldWnd)
+void CViewObjHierarchy::OnSetFocus(CWnd* pOldWnd)
 {
 	CDockablePane::OnSetFocus(pOldWnd);
 
 	m_wndClassView.SetFocus();
 }
 
-void CClassView::OnChangeVisualStyle()
+void CViewObjHierarchy::OnChangeVisualStyle()
 {
 	m_ClassViewImages.DeleteImageList();
 
@@ -368,3 +372,5 @@ void CClassView::OnChangeVisualStyle()
 	m_wndToolBar.CleanUpLockedImages();
 	m_wndToolBar.LoadBitmap(theApp.m_bHiColorIcons ? IDB_SORT_24 : IDR_SORT, 0, 0, TRUE /* Locked */);
 }
+
+

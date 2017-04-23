@@ -134,7 +134,7 @@
     <None Include="UserImages.bmp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ClassView.h" />
+    <ClInclude Include="ViewObjHierarchy.h" />
     <ClInclude Include="MainFrm.h" />
     <ClInclude Include="objcontainer.h" />
     <ClInclude Include="objcontainerDoc.h" />
@@ -148,10 +148,11 @@
     <ClInclude Include="targetver.h" />
     <ClInclude Include="TOpenGLView.h" />
     <ClInclude Include="TreeNodePersist.h" />
+    <ClInclude Include="ViewPane.h" />
     <ClInclude Include="ViewTree.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="ClassView.cpp" />
+    <ClCompile Include="ViewObjHierarchy.cpp" />
     <ClCompile Include="MainFrm.cpp" />
     <ClCompile Include="objcontainer.cpp" />
     <ClCompile Include="objcontainerDoc.cpp" />
@@ -164,6 +165,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="ViewPane.cpp" />
     <ClCompile Include="ViewTree.cpp" />
   </ItemGroup>
   <ItemGroup>

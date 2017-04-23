@@ -4,6 +4,7 @@
 #include "ViewTree.h"
 #include "Resource.h"
 #include "objcontainerDoc.h"
+#include "ViewPane.h"
 
 class CClassToolBar : public CMFCToolBar
 {
@@ -15,11 +16,11 @@ class CClassToolBar : public CMFCToolBar
 	virtual BOOL AllowShowOnList() const { return FALSE; }
 };
 
-class CClassView : public CDockablePane
+class CViewObjHierarchy : public CViewPane
 {
 public:
-	CClassView();
-	virtual ~CClassView();
+	CViewObjHierarchy();
+	virtual ~CViewObjHierarchy();
 
 	void AdjustLayout();
 	void OnChangeVisualStyle();
@@ -30,13 +31,13 @@ protected:
 	CImageList m_ClassViewImages;
 	UINT m_nCurrSort;
 	enum {ID_TREEVIEW = 1, ID_TOOLBAR = IDR_SORT};
-	void FillClassView();
-	CobjcontainerDoc* GetDocument();
+	void FillObjHierarchy();
 
 // Overrides
 public:
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
 	virtual BOOL OnNotify(WPARAM wParam, LPARAM lParam, LRESULT* pResult);
+	virtual void OnUpdate(CWnd* pSender, CobjcontainerDoc::OP op, CObject3D* pObj);
 protected:
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	afx_msg void OnSize(UINT nType, int cx, int cy);

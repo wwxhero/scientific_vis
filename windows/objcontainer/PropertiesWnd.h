@@ -1,6 +1,6 @@
 
 #pragma once
-
+#include "ViewPane.h"
 class CPropertiesToolBar : public CMFCToolBar
 {
 public:
@@ -12,7 +12,7 @@ public:
 	virtual BOOL AllowShowOnList() const { return FALSE; }
 };
 
-class CPropertiesWnd : public CDockablePane
+class CPropertiesWnd : public CViewPane
 {
 // Construction
 public:
@@ -29,6 +29,7 @@ public:
 	}
 
 protected:
+	virtual void OnUpdate(CWnd* pSender, CobjcontainerDoc::OP op, CObject3D* obj);
 	CFont m_fntPropList;
 	//CComboBox m_wndObjectCombo;
 	CPropertiesToolBar m_wndToolBar;
@@ -51,7 +52,7 @@ protected:
 	afx_msg void OnUpdateProperties2(CCmdUI* pCmdUI);
 	afx_msg void OnSetFocus(CWnd* pOldWnd);
 	afx_msg void OnSettingChange(UINT uFlags, LPCTSTR lpszSection);
-
+	afx_msg LRESULT OnInitialUpdate(WPARAM, LPARAM);
 	DECLARE_MESSAGE_MAP()
 
 	void InitPropList();

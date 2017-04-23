@@ -15,6 +15,7 @@
 
 #include "Object3D.h"
 #include <queue>
+#include "ViewPane.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -51,6 +52,21 @@ BOOL CobjcontainerDoc::OnNewDocument()
 	return TRUE;
 }
 
+void CobjcontainerDoc::UpdateAllViews(CWnd* pSender, CobjcontainerDoc::OP op, CObject3D* pHint)
+{
+	if (pSender->IsKindOf(RUNTIME_CLASS(CView)))
+	{
+		CDocument::UpdateAllViews(static_cast<CView*>(pSender), LPARAM(op), pHint);
+		pSender = NULL;
+	}
+	else
+		CDocument::UpdateAllViews(NULL, op, pHint);
+	for (std::list<CViewPane*>::iterator it = m_lstViews.begin(); it != m_lstViews.end(); it ++)
+	{
+		CViewPane* pView = *it;
+		pView->OnUpdate(pSender, op, pHint);
+	}
+}
 
 
 
@@ -269,6 +285,7 @@ void CobjcontainerDoc::SetSearchContent(const CString& value)
 		}
 	}
 }
+
 
 #endif // SHARED_HANDLERS
 
