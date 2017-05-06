@@ -13,7 +13,11 @@ public:
 	}
 	void Reset()
 	{
-
+		m_firstChild = NULL;
+		m_nextSibbling = NULL;
+		m_parent = NULL;
+		m_local2parent = Matrix4x4(1);
+		m_parent2local = Matrix4x4(1);
 	}
 
 	void Reset(const CScene* src)

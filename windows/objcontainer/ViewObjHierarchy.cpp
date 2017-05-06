@@ -69,10 +69,10 @@ const CViewObjHierarchy::TREEITEM CViewObjHierarchy::TreeItem(LPCSTR name)
 	return item;
 }
 
-LPCSTR CViewObjHierarchy::s_funcCmdNewObj[] = {"CBox"};
+LPCSTR CViewObjHierarchy::s_funcCmdNewObj[] = {"CBox", "CObjectWaveFront"};
 const LPCSTR CViewObjHierarchy::ClsName(UINT id)
 {
-	const UINT c_idBase = ID_NEW_FOLDER;
+	const UINT c_idBase = ID_NEW_BOX;
 	return s_funcCmdNewObj[id - c_idBase];
 }
 //////////////////////////////////////////////////////////////////////
@@ -98,7 +98,7 @@ BEGIN_MESSAGE_MAP(CViewObjHierarchy, CDockablePane)
 	ON_COMMAND(ID_CLASS_ADD_MEMBER_VARIABLE, OnClassAddMemberVariable)
 	ON_COMMAND(ID_CLASS_DEFINITION, OnClassDefinition)
 	ON_COMMAND(ID_CLASS_PROPERTIES, OnClassProperties)
-	ON_COMMAND_RANGE(ID_NEW_FOLDER, ID_NEW_FOLDER + 1, OnNewBox)
+	ON_COMMAND_RANGE(ID_NEW_BOX, ID_NEW_OBJWAVEFRONT, OnNewObj)
 	ON_WM_PAINT()
 	ON_WM_SETFOCUS()
 	ON_COMMAND_RANGE(ID_SORTING_GROUPBYTYPE, ID_SORTING_SORTBYACCESS, OnSort)
@@ -405,7 +405,7 @@ void CViewObjHierarchy::OnClassProperties()
 	// TODO: Add your command handler code here
 }
 
-void CViewObjHierarchy::OnNewBox(UINT nID)
+void CViewObjHierarchy::OnNewObj(UINT nID)
 {
 	//AfxMessageBox(_T("New Folder..."));
 	//todo: Add new Object here

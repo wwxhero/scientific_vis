@@ -42,7 +42,7 @@ protected:
 	afx_msg void OnClassAddMemberVariable();
 	afx_msg void OnClassDefinition();
 	afx_msg void OnClassProperties();
-	afx_msg void OnNewBox(UINT nID);
+	afx_msg void OnNewObj(UINT nID);
 	afx_msg void OnPaint();
 	afx_msg void OnSetFocus(CWnd* pOldWnd);
 	afx_msg LRESULT OnChangeActiveTab(WPARAM, LPARAM);

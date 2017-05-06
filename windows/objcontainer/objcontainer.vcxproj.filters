@@ -145,6 +145,12 @@
     <ClInclude Include="ViewPane.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Box.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ObjectWaveFront.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="objcontainer.cpp">
@@ -181,6 +187,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ViewPane.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Box.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ObjectWaveFront.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
