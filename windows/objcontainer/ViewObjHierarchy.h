@@ -43,6 +43,7 @@ protected:
 	afx_msg void OnClassDefinition();
 	afx_msg void OnClassProperties();
 	afx_msg void OnNewObj(UINT nID);
+	afx_msg void OnDeleteObj();
 	afx_msg void OnPaint();
 	afx_msg void OnSetFocus(CWnd* pOldWnd);
 	afx_msg LRESULT OnChangeActiveTab(WPARAM, LPARAM);
@@ -52,6 +53,14 @@ protected:
 
 	DECLARE_MESSAGE_MAP()
 
+private:
+	typedef struct _Item
+	{
+		HTREEITEM hItem;
+		CObject3D* pItem;
+	} Item;
+
+	void GetSelectedItem(Item& item);
 
 protected:
 	CClassToolBar m_wndToolBar;
@@ -59,12 +68,7 @@ protected:
 	CImageList m_ClassViewImages;
 	UINT m_nCurrSort;
 
-	typedef struct _Item
-	{
-		HTREEITEM hItem;
-		CObject3D* pItem;
-	} Item;
-	Item m_Selected;
+
 
 	typedef struct _FuncObjTreeItem
 	{

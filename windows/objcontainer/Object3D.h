@@ -25,6 +25,7 @@ public:
 	{
 		strName = _T("Generic 3D Object");
 	}
+	virtual void RemoveSelf();
 private:
 	virtual void Serialize(CArchive& ar);
 

@@ -2,8 +2,10 @@
 //
 
 #include "stdafx.h"
+#include <queue>
 #include "objcontainer.h"
 #include "Object3D.h"
+
 
 
 // CObject3D
@@ -68,6 +70,51 @@ void CObject3D::AddChild(CObject3D* child)
 	child->m_parent = this;
 }
 
-
+void CObject3D::RemoveSelf()
+{
+	std::queue<CObject3D*> tq;
+	CObject3D* c = GetFirstChild();
+	while(c)
+	{
+		tq.push(c);
+		c = c->GetNextSibbling();
+	}
+	while(!tq.empty())
+	{
+		CObject3D* n = tq.front();
+		tq.pop();
+		c = n->GetFirstChild();
+		while(c)
+		{
+			tq.push(c);
+			c = c->GetNextSibbling();
+		}
+		delete n;
+	}
+	CObject3D* p = m_parent;
+	if (p)
+	{
+		CObject3D* s = p->GetFirstChild();
+		CObject3D* sp = NULL;
+		while(s)
+		{
+			if (s == this)
+			{
+				if (NULL == sp)
+				{
+					p->m_firstChild = s->m_nextSibbling;
+				}
+				else
+				{
+					sp->m_nextSibbling = s->m_nextSibbling;
+				}
+				break;
+			}
+			sp = s;
+			s = s->GetNextSibbling();
+		}
+	}
+	delete this;
+}
 
 // CObject3D member functions

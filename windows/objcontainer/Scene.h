@@ -28,5 +28,9 @@ public:
 		m_parent = src->m_parent;
 		m_parent2local = src->m_parent2local;
 	}
+
+	virtual void RemoveSelf()
+	{
+	}
 };
 

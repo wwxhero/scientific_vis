@@ -81,8 +81,6 @@ const LPCSTR CViewObjHierarchy::ClsName(UINT id)
 
 CViewObjHierarchy::CViewObjHierarchy()
 {
-	m_Selected.hItem = NULL;
-	m_Selected.pItem = NULL;
 	m_nCurrSort = ID_SORTING_GROUPBYTYPE;
 }
 
@@ -99,6 +97,7 @@ BEGIN_MESSAGE_MAP(CViewObjHierarchy, CDockablePane)
 	ON_COMMAND(ID_CLASS_DEFINITION, OnClassDefinition)
 	ON_COMMAND(ID_CLASS_PROPERTIES, OnClassProperties)
 	ON_COMMAND_RANGE(ID_NEW_BOX, ID_NEW_OBJWAVEFRONT, OnNewObj)
+	ON_COMMAND(ID_DELETE_OBJ, OnDeleteObj)
 	ON_WM_PAINT()
 	ON_WM_SETFOCUS()
 	ON_COMMAND_RANGE(ID_SORTING_GROUPBYTYPE, ID_SORTING_SORTBYACCESS, OnSort)
@@ -137,16 +136,10 @@ BOOL CViewObjHierarchy::OnNotify(WPARAM wParam, LPARAM lParam, LRESULT* pResult)
 		ASSERT(pNMHDR != NULL);
 		if (pNMHDR && pNMHDR->code == TVN_SELCHANGED)
 		{
-			HTREEITEM hItem = m_wndObjsTreeView.GetSelectedItem();
-			TVITEM item;
-			item.mask = TVIF_PARAM;
-			item.hItem = hItem;
-			m_wndObjsTreeView.GetItem(&item);
-			CObject3D* pObj = (CObject3D *)(item.lParam);
+			Item item;
+			GetSelectedItem(item);
 			CobjcontainerDoc* pDoc = GetDocument();
-			pDoc->UpdateAllViews(this, CobjcontainerDoc::OP_SEL, pObj);
-			m_Selected.hItem = hItem;
-			m_Selected.pItem = pObj;
+			pDoc->UpdateAllViews(this, CobjcontainerDoc::OP_SEL, item.pItem);
 		}
 	}
 	return CDockablePane::OnNotify(wParam, lParam, pResult);
@@ -280,21 +273,6 @@ void CViewObjHierarchy::FillObjHierarchy()
 			unitNext.from = unitNext.from->GetNextSibbling();;
 		}
 	}
-
-
-	//std::stack<CObject3D*> stkObjs;
-	//std::stack<HTREEITEM
-
-
-	/*HTREEITEM hRoot = m_wndObjsTreeView.InsertItem(_T("VisObjects"), 0, 0);
-	m_wndObjsTreeView.SetItemState(hRoot, TVIS_BOLD, TVIS_BOLD);
-
-	HTREEITEM hClass = m_wndObjsTreeView.InsertItem(_T("3d Objects"), 1, 1, hRoot);
-	m_wndObjsTreeView.InsertItem(_T("Car"), 3, 3, hClass);
-
-	m_wndObjsTreeView.Expand(hRoot, TVE_EXPAND);
-
-	hClass = m_wndObjsTreeView.InsertItem(_T("2d Objects"), 1, 1, hRoot);*/
 }
 
 void CViewObjHierarchy::OnContextMenu(CWnd* pWnd, CPoint point)
@@ -405,11 +383,42 @@ void CViewObjHierarchy::OnClassProperties()
 	// TODO: Add your command handler code here
 }
 
+
+VOID CViewObjHierarchy::OnDeleteObj()
+{
+	Item item;
+	GetSelectedItem(item);
+	if (NULL != item.pItem
+		&& !item.pItem->IsKindOf(RUNTIME_CLASS(CScene)))
+	{
+		CobjcontainerDoc* pDoc = GetDocument();
+		pDoc->UpdateAllViews(this, CobjcontainerDoc::OP_DEL, item.pItem);
+		item.pItem->RemoveSelf();
+		m_wndObjsTreeView.DeleteItem(item.hItem);
+	}
+}
+
+void CViewObjHierarchy::GetSelectedItem(Item& a_item)
+{
+	HTREEITEM hItem = NULL;
+	CObject3D* pObj = NULL;
+	if (NULL != (hItem = m_wndObjsTreeView.GetSelectedItem()))
+	{
+		TVITEM item;
+		item.mask = TVIF_PARAM;
+		item.hItem = hItem;
+		m_wndObjsTreeView.GetItem(&item);
+		pObj = (CObject3D *)(item.lParam);
+	}
+	a_item.pItem = pObj;
+	a_item.hItem = hItem;
+	ASSERT((NULL == hItem) == (NULL == pObj));
+}
+
 void CViewObjHierarchy::OnNewObj(UINT nID)
 {
-	//AfxMessageBox(_T("New Folder..."));
-	//todo: Add new Object here
-	Item parent = {m_Selected.hItem, m_Selected.pItem};
+	Item parent;
+	GetSelectedItem(parent);
 	CobjcontainerDoc* pDoc = GetDocument();
 	if (NULL == parent.hItem
 	|| NULL == parent.pItem)
