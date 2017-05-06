@@ -25,12 +25,8 @@ public:
 	void AdjustLayout();
 	void OnChangeVisualStyle();
 
-protected:
-	CClassToolBar m_wndToolBar;
-	CViewTree m_wndClassView;
-	CImageList m_ClassViewImages;
-	UINT m_nCurrSort;
 	enum {ID_TREEVIEW = 1, ID_TOOLBAR = IDR_SORT};
+	enum TREEITEM {ID_ITEM_SCENE = 0, ID_ITEM_WAVEFRONTOBJ, ID_ITEM_UNKNOWN, ID_ITEM_BOX, ID_ITEM_TOTAL};
 	void FillObjHierarchy();
 
 // Overrides
@@ -46,7 +42,7 @@ protected:
 	afx_msg void OnClassAddMemberVariable();
 	afx_msg void OnClassDefinition();
 	afx_msg void OnClassProperties();
-	afx_msg void OnNewFolder();
+	afx_msg void OnNewBox(UINT nID);
 	afx_msg void OnPaint();
 	afx_msg void OnSetFocus(CWnd* pOldWnd);
 	afx_msg LRESULT OnChangeActiveTab(WPARAM, LPARAM);
@@ -55,5 +51,32 @@ protected:
 	afx_msg LRESULT OnInitialUpdate(WPARAM, LPARAM);
 
 	DECLARE_MESSAGE_MAP()
+
+
+protected:
+	CClassToolBar m_wndToolBar;
+	CViewTree m_wndObjsTreeView;
+	CImageList m_ClassViewImages;
+	UINT m_nCurrSort;
+
+	typedef struct _Item
+	{
+		HTREEITEM hItem;
+		CObject3D* pItem;
+	} Item;
+	Item m_Selected;
+
+	typedef struct _FuncObjTreeItem
+	{
+		LPCSTR x;
+		TREEITEM y;
+	} FuncObjTreeItem; //invertable func
+
+	static FuncObjTreeItem s_funcObjTreeItem[];
+	static const LPCSTR Object(TREEITEM item);
+	static const TREEITEM TreeItem(LPCSTR name);
+
+	static LPCSTR s_funcCmdNewObj[];
+	static const LPCSTR ClsName(UINT id);
 };
 

@@ -5,6 +5,7 @@ class CObject3D : public CObject
 				, public CTreeNodePersist<CObject3D>
 {
 	friend class CTreeNodePersist<CObject3D>;
+	friend class CScene;
 public:
 	DECLARE_SERIAL( CObject3D )
 	CObject3D();

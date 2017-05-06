@@ -134,6 +134,8 @@
     <None Include="UserImages.bmp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Box.h" />
+    <ClInclude Include="ObjectWaveFront.h" />
     <ClInclude Include="ViewObjHierarchy.h" />
     <ClInclude Include="MainFrm.h" />
     <ClInclude Include="objcontainer.h" />
@@ -152,6 +154,8 @@
     <ClInclude Include="ViewTree.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Box.cpp" />
+    <ClCompile Include="ObjectWaveFront.cpp" />
     <ClCompile Include="ViewObjHierarchy.cpp" />
     <ClCompile Include="MainFrm.cpp" />
     <ClCompile Include="objcontainer.cpp" />

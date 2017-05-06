@@ -5,6 +5,8 @@
 #include "ViewObjHierarchy.h"
 #include "objcontainer.h"
 #include "objcontainerDoc.h"
+#include <queue>
+#include "Box.h"
 
 class CClassViewMenuButton : public CMFCToolBarMenuButton
 {
@@ -33,12 +35,54 @@ public:
 
 IMPLEMENT_SERIAL(CClassViewMenuButton, CMFCToolBarMenuButton, 1)
 
+
+CViewObjHierarchy::FuncObjTreeItem CViewObjHierarchy::s_funcObjTreeItem[] = {
+	{"CScene", ID_ITEM_SCENE}
+	, {"CObjectWaveFront", ID_ITEM_WAVEFRONTOBJ}
+	, {"CBox", ID_ITEM_BOX}
+};
+
+const LPCSTR CViewObjHierarchy::Object(TREEITEM item)
+{
+	LPCSTR name = NULL;
+	for (int i = 0
+		; NULL == name && i < sizeof(s_funcObjTreeItem)/sizeof(FuncObjTreeItem)
+		; i ++)
+	{
+		if (item == s_funcObjTreeItem[i].y)
+			name = s_funcObjTreeItem[i].x;
+	}
+	return name;
+}
+
+const CViewObjHierarchy::TREEITEM CViewObjHierarchy::TreeItem(LPCSTR name)
+{
+	const TREEITEM c_invalid = ID_ITEM_TOTAL;
+	TREEITEM item = c_invalid;
+	for (int i = 0
+		; c_invalid == item && i < sizeof(s_funcObjTreeItem)/sizeof(FuncObjTreeItem)
+		; i ++)
+	{
+		if (name == s_funcObjTreeItem[i].x)
+			item = s_funcObjTreeItem[i].y;
+	}
+	return item;
+}
+
+LPCSTR CViewObjHierarchy::s_funcCmdNewObj[] = {"CBox"};
+const LPCSTR CViewObjHierarchy::ClsName(UINT id)
+{
+	const UINT c_idBase = ID_NEW_FOLDER;
+	return s_funcCmdNewObj[id - c_idBase];
+}
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
 CViewObjHierarchy::CViewObjHierarchy()
 {
+	m_Selected.hItem = NULL;
+	m_Selected.pItem = NULL;
 	m_nCurrSort = ID_SORTING_GROUPBYTYPE;
 }
 
@@ -54,7 +98,7 @@ BEGIN_MESSAGE_MAP(CViewObjHierarchy, CDockablePane)
 	ON_COMMAND(ID_CLASS_ADD_MEMBER_VARIABLE, OnClassAddMemberVariable)
 	ON_COMMAND(ID_CLASS_DEFINITION, OnClassDefinition)
 	ON_COMMAND(ID_CLASS_PROPERTIES, OnClassProperties)
-	ON_COMMAND(ID_NEW_FOLDER, OnNewFolder)
+	ON_COMMAND_RANGE(ID_NEW_FOLDER, ID_NEW_FOLDER + 1, OnNewBox)
 	ON_WM_PAINT()
 	ON_WM_SETFOCUS()
 	ON_COMMAND_RANGE(ID_SORTING_GROUPBYTYPE, ID_SORTING_SORTBYACCESS, OnSort)
@@ -93,14 +137,16 @@ BOOL CViewObjHierarchy::OnNotify(WPARAM wParam, LPARAM lParam, LRESULT* pResult)
 		ASSERT(pNMHDR != NULL);
 		if (pNMHDR && pNMHDR->code == TVN_SELCHANGED)
 		{
-			HTREEITEM hItem = m_wndClassView.GetSelectedItem();
+			HTREEITEM hItem = m_wndObjsTreeView.GetSelectedItem();
 			TVITEM item;
 			item.mask = TVIF_PARAM;
 			item.hItem = hItem;
-			m_wndClassView.GetItem(&item);
+			m_wndObjsTreeView.GetItem(&item);
 			CObject3D* pObj = (CObject3D *)(item.lParam);
 			CobjcontainerDoc* pDoc = GetDocument();
-			pDoc->SelectObj(pObj, this);
+			pDoc->UpdateAllViews(this, CobjcontainerDoc::OP_SEL, pObj);
+			m_Selected.hItem = hItem;
+			m_Selected.pItem = pObj;
 		}
 	}
 	return CDockablePane::OnNotify(wParam, lParam, pResult);
@@ -118,7 +164,7 @@ int CViewObjHierarchy::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	// Create views:
 	const DWORD dwViewStyle = WS_CHILD | WS_VISIBLE | TVS_HASLINES | TVS_LINESATROOT | TVS_HASBUTTONS | WS_CLIPSIBLINGS | WS_CLIPCHILDREN;
 
-	if (!m_wndClassView.Create(dwViewStyle, rectDummy, this, ID_TREEVIEW))
+	if (!m_wndObjsTreeView.Create(dwViewStyle, rectDummy, this, ID_TREEVIEW))
 	{
 		TRACE0("Failed to create Class View\n");
 		return -1;      // fail to create
@@ -168,7 +214,7 @@ void CViewObjHierarchy::OnSize(UINT nType, int cx, int cy)
 
 void CViewObjHierarchy::FillObjHierarchy()
 {
-	m_wndClassView.DeleteAllItems();
+	m_wndObjsTreeView.DeleteAllItems();
 
 	CobjcontainerDoc* pDoc = GetDocument();
 
@@ -176,15 +222,16 @@ void CViewObjHierarchy::FillObjHierarchy()
 	UINT uMask = TVIF_IMAGE|TVIF_PARAM|TVIF_SELECTEDIMAGE|TVIF_TEXT;
 	CString str;
 	root->GetName(str);
-	int nImg = 0;
-	int nSelectedImg = 0;
+	CRuntimeClass* prt = root->GetRuntimeClass();
+	int nImg = TreeItem(prt->m_lpszClassName);
+	int nSelectedImg = TreeItem(prt->m_lpszClassName);
 	UINT nState = TVIS_BOLD;
 	UINT nStateMask = TVIS_BOLD;
 	LPARAM lParam = (LPARAM)root;
 	HTREEITEM hParent = NULL;
 	HTREEITEM hInsertAfter = NULL;
 
-	HTREEITEM hRoot = m_wndClassView.InsertItem(
+	HTREEITEM hRoot = m_wndObjsTreeView.InsertItem(
 										uMask
 										, str
 										, nImg
@@ -194,26 +241,65 @@ void CViewObjHierarchy::FillObjHierarchy()
 										, lParam
 										, hParent
 										, hInsertAfter);
-	//todo: a generic tree construction algorithm
+	typedef struct stTreeNodeInitializer
+	{
+		CObject3D* from;
+		HTREEITEM to;
+	} TreeNodeInitializer;
+	std::queue<TreeNodeInitializer> queBFS;
+	TreeNodeInitializer unit = {root, hRoot};
+	queBFS.push(unit);
+	while(!queBFS.empty())
+	{
+		TreeNodeInitializer unitThis = queBFS.front();
+		queBFS.pop();
+		TreeNodeInitializer unitNext = {unitThis.from->GetFirstChild(), NULL};
+		hParent = unitThis.to;
+		hInsertAfter = NULL;
+		while (NULL != unitNext.from)
+		{
+			prt = unitNext.from->GetRuntimeClass();
+			nImg = TreeItem(prt->m_lpszClassName);
+			nSelectedImg = TreeItem(prt->m_lpszClassName);
+
+			unitNext.from->GetName(str);
+			lParam = (LPARAM)unitNext.from;
+			unitNext.to = m_wndObjsTreeView.InsertItem(
+										uMask
+										, str
+										, nImg
+										, nSelectedImg
+										, nState
+										, nStateMask
+										, lParam
+										, hParent
+										, hInsertAfter);
+			queBFS.push(unitNext);
+
+			hInsertAfter = unitNext.to;
+			unitNext.from = unitNext.from->GetNextSibbling();;
+		}
+	}
+
 
 	//std::stack<CObject3D*> stkObjs;
 	//std::stack<HTREEITEM
 
 
-	/*HTREEITEM hRoot = m_wndClassView.InsertItem(_T("VisObjects"), 0, 0);
-	m_wndClassView.SetItemState(hRoot, TVIS_BOLD, TVIS_BOLD);
+	/*HTREEITEM hRoot = m_wndObjsTreeView.InsertItem(_T("VisObjects"), 0, 0);
+	m_wndObjsTreeView.SetItemState(hRoot, TVIS_BOLD, TVIS_BOLD);
 
-	HTREEITEM hClass = m_wndClassView.InsertItem(_T("3d Objects"), 1, 1, hRoot);
-	m_wndClassView.InsertItem(_T("Car"), 3, 3, hClass);
+	HTREEITEM hClass = m_wndObjsTreeView.InsertItem(_T("3d Objects"), 1, 1, hRoot);
+	m_wndObjsTreeView.InsertItem(_T("Car"), 3, 3, hClass);
 
-	m_wndClassView.Expand(hRoot, TVE_EXPAND);
+	m_wndObjsTreeView.Expand(hRoot, TVE_EXPAND);
 
-	hClass = m_wndClassView.InsertItem(_T("2d Objects"), 1, 1, hRoot);*/
+	hClass = m_wndObjsTreeView.InsertItem(_T("2d Objects"), 1, 1, hRoot);*/
 }
 
 void CViewObjHierarchy::OnContextMenu(CWnd* pWnd, CPoint point)
 {
-	CTreeCtrl* pWndTree = (CTreeCtrl*)&m_wndClassView;
+	CTreeCtrl* pWndTree = (CTreeCtrl*)&m_wndObjsTreeView;
 	ASSERT_VALID(pWndTree);
 
 	if (pWnd != pWndTree)
@@ -267,7 +353,7 @@ void CViewObjHierarchy::AdjustLayout()
 	int cyTlb = m_wndToolBar.CalcFixedLayout(FALSE, TRUE).cy;
 
 	m_wndToolBar.SetWindowPos(NULL, rectClient.left, rectClient.top, rectClient.Width(), cyTlb, SWP_NOACTIVATE | SWP_NOZORDER);
-	m_wndClassView.SetWindowPos(NULL, rectClient.left + 1, rectClient.top + cyTlb + 1, rectClient.Width() - 2, rectClient.Height() - cyTlb - 2, SWP_NOACTIVATE | SWP_NOZORDER);
+	m_wndObjsTreeView.SetWindowPos(NULL, rectClient.left + 1, rectClient.top + cyTlb + 1, rectClient.Width() - 2, rectClient.Height() - cyTlb - 2, SWP_NOACTIVATE | SWP_NOZORDER);
 }
 
 BOOL CViewObjHierarchy::PreTranslateMessage(MSG* pMsg)
@@ -319,9 +405,50 @@ void CViewObjHierarchy::OnClassProperties()
 	// TODO: Add your command handler code here
 }
 
-void CViewObjHierarchy::OnNewFolder()
+void CViewObjHierarchy::OnNewBox(UINT nID)
 {
-	AfxMessageBox(_T("New Folder..."));
+	//AfxMessageBox(_T("New Folder..."));
+	//todo: Add new Object here
+	Item parent = {m_Selected.hItem, m_Selected.pItem};
+	CobjcontainerDoc* pDoc = GetDocument();
+	if (NULL == parent.hItem
+	|| NULL == parent.pItem)
+	{
+		parent.hItem = m_wndObjsTreeView.GetRootItem();
+		parent.pItem = pDoc->RootObj();
+	}
+
+	Item child;
+	CRuntimeClass* prt = CRuntimeClass::FromName(ClsName(nID));
+	child.pItem = static_cast<CObject3D*>(prt->CreateObject());
+
+	parent.pItem->AddChild(child.pItem);
+
+	UINT uMask = TVIF_IMAGE|TVIF_PARAM|TVIF_SELECTEDIMAGE|TVIF_TEXT;
+	CString str;
+	child.pItem->GetName(str);
+	int nImg = TreeItem(prt->m_lpszClassName);
+	int nSelectedImg = TreeItem(prt->m_lpszClassName);
+	UINT nState = TVIS_BOLD;
+	UINT nStateMask = TVIS_BOLD;
+	LPARAM lParam = (LPARAM)child.pItem;
+	HTREEITEM hParent = parent.hItem;
+	HTREEITEM hInsertAfter = TVI_FIRST; //m_wndObjsTreeView.GetChildItem(parent.hItem);
+
+	child.hItem = m_wndObjsTreeView.InsertItem(
+										uMask
+										, str
+										, nImg
+										, nSelectedImg
+										, nState
+										, nStateMask
+										, lParam
+										, hParent
+										, hInsertAfter);
+
+	pDoc->UpdateAllViews(this, CobjcontainerDoc::OP_NEW, child.pItem);
+	m_wndObjsTreeView.Expand(parent.hItem, TVE_EXPAND);
+	//m_wndObjsTreeView.Invalidate();
 }
 
 void CViewObjHierarchy::OnPaint()
@@ -329,7 +456,7 @@ void CViewObjHierarchy::OnPaint()
 	CPaintDC dc(this); // device context for painting
 
 	CRect rectTree;
-	m_wndClassView.GetWindowRect(rectTree);
+	m_wndObjsTreeView.GetWindowRect(rectTree);
 	ScreenToClient(rectTree);
 
 	rectTree.InflateRect(1, 1);
@@ -340,7 +467,7 @@ void CViewObjHierarchy::OnSetFocus(CWnd* pOldWnd)
 {
 	CDockablePane::OnSetFocus(pOldWnd);
 
-	m_wndClassView.SetFocus();
+	m_wndObjsTreeView.SetFocus();
 }
 
 void CViewObjHierarchy::OnChangeVisualStyle()
@@ -367,7 +494,7 @@ void CViewObjHierarchy::OnChangeVisualStyle()
 	m_ClassViewImages.Create(16, bmpObj.bmHeight, nFlags, 0, 0);
 	m_ClassViewImages.Add(&bmp, RGB(255, 0, 0));
 
-	m_wndClassView.SetImageList(&m_ClassViewImages, TVSIL_NORMAL);
+	m_wndObjsTreeView.SetImageList(&m_ClassViewImages, TVSIL_NORMAL);
 
 	m_wndToolBar.CleanUpLockedImages();
 	m_wndToolBar.LoadBitmap(theApp.m_bHiColorIcons ? IDB_SORT_24 : IDR_SORT, 0, 0, TRUE /* Locked */);

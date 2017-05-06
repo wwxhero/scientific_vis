@@ -39,16 +39,51 @@ CobjcontainerDoc::CobjcontainerDoc()
 
 CobjcontainerDoc::~CobjcontainerDoc()
 {
+	ClearScene();
+}
+
+void CobjcontainerDoc::ClearScene()
+{
+	std::queue<CObject3D*> q;
+	q.push(&m_scene);
+	std::list<CObject3D*> l;
+	while (!q.empty())
+	{
+		CObject3D* n = q.front();
+		CObject3D* c = n->GetFirstChild();
+		while(c)
+		{
+			q.push(c);
+			c = c->GetNextSibbling();
+		}
+		q.pop();
+		l.push_back(n);
+	}
+
+	std::list<CObject3D*>::iterator it = l.end();
+	it --;
+	for(; it != l.begin(); it --)
+		delete *it;
+	m_scene.Reset();
 }
 
 BOOL CobjcontainerDoc::OnNewDocument()
 {
+	ClearScene();
 	if (!CDocument::OnNewDocument())
 		return FALSE;
 
 	// TODO: add reinitialization code here
 	// (SDI documents will reuse this document)
 
+	return TRUE;
+}
+
+BOOL CobjcontainerDoc::OnOpenDocument(LPCTSTR lpszPathName)
+{
+	ClearScene();
+	if (!CDocument::OnOpenDocument(lpszPathName))
+		return FALSE;
 	return TRUE;
 }
 
@@ -76,8 +111,49 @@ void CobjcontainerDoc::Serialize(CArchive& ar)
 {
 #ifdef TEST_SIERALIZATION
 	//TestBasicSerialization(ar);
-	TestTreeSerialization(ar);
+	//TestTreeSerialization(ar);
 #endif
+	if (ar.IsStoring())
+	{
+		std::queue<CObject3D*> tq2;
+		tq2.push(&m_scene);
+		CObArray poolObjs;
+		while(!tq2.empty())
+		{
+			CObject3D* n = tq2.front();
+			tq2.pop();
+			CObject3D* c = n->GetFirstChild();
+			while (c)
+			{
+				tq2.push(c);
+				c = c->GetNextSibbling();
+			}
+			n->SaveTreeNode(poolObjs);
+		}
+		poolObjs.Serialize(ar);
+	}
+	else
+	{
+		CObArray poolObjs;
+		poolObjs.Serialize(ar);
+		if (!poolObjs.IsEmpty())
+		{
+			CObject* pObj = poolObjs.GetAt(0);
+			ASSERT(pObj->IsKindOf(RUNTIME_CLASS(CObject3D)));
+			CObject3D* root = static_cast<CObject3D*>(pObj);
+			for (int i = 0; i < poolObjs.GetCount(); i ++)
+			{
+				pObj = poolObjs.GetAt(i);
+				ASSERT(pObj->IsKindOf(RUNTIME_CLASS(CObject3D)));
+				CObject3D* node = static_cast<CObject3D*>(pObj);
+				node->RestoreTreeNode(poolObjs);
+			}
+
+			ASSERT(root->IsKindOf(RUNTIME_CLASS(CScene)));
+			m_scene.Reset(static_cast<CScene*>(root));
+			delete root;
+		}
+	}
 }
 
 #ifdef TEST_SIERALIZATION

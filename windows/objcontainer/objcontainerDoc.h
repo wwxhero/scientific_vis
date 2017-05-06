@@ -15,13 +15,14 @@ protected: // create from serialization only
 
 // Attributes
 public:
-	enum OP {OP_SEL = 0 };
+	enum OP {OP_SEL = 0, OP_NEW };
 // Operations
 public:
 
 // Overrides
 public:
 	virtual BOOL OnNewDocument();
+	virtual BOOL OnOpenDocument(LPCTSTR lpszPathName);
 	virtual void Serialize(CArchive& ar);
 #ifdef SHARED_HANDLERS
 	virtual void InitializeSearchContent();
@@ -41,10 +42,7 @@ public:
 		return &m_scene;
 	}
 
-	void SelectObj(CObject3D* pObj, CWnd* pSender)
-	{
-		UpdateAllViews(pSender, OP_SEL,	pObj);
-	}
+	void ClearScene();
 
 	void UpdateAllViews(CWnd* pSender, OP op, CObject3D* pHint);
 	void RegisterView(CViewPane* pView)
@@ -83,4 +81,5 @@ private:
 
 	CScene m_scene;
 	std::list<CViewPane*> m_lstViews;
+
 };
