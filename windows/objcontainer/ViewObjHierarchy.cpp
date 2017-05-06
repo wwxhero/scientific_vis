@@ -448,7 +448,7 @@ void CViewObjHierarchy::OnNewBox(UINT nID)
 
 	pDoc->UpdateAllViews(this, CobjcontainerDoc::OP_NEW, child.pItem);
 	m_wndObjsTreeView.Expand(parent.hItem, TVE_EXPAND);
-	//m_wndObjsTreeView.Invalidate();
+	m_wndObjsTreeView.SelectItem(child.hItem);
 }
 
 void CViewObjHierarchy::OnPaint()
