@@ -4,8 +4,9 @@
 
 
 #pragma once
-
-
+#include <list>
+#include "Scene.h"
+class CViewPane;
 class CobjcontainerDoc : public CDocument
 {
 protected: // create from serialization only
@@ -14,13 +15,14 @@ protected: // create from serialization only
 
 // Attributes
 public:
-
+	enum OP {OP_SEL = 0, OP_NEW, OP_DEL, OP_CNN_PARENT, OP_CNN_CHILD };
 // Operations
 public:
 
 // Overrides
 public:
 	virtual BOOL OnNewDocument();
+	virtual BOOL OnOpenDocument(LPCTSTR lpszPathName);
 	virtual void Serialize(CArchive& ar);
 #ifdef SHARED_HANDLERS
 	virtual void InitializeSearchContent();
@@ -35,11 +37,34 @@ public:
 	virtual void Dump(CDumpContext& dc) const;
 #endif
 
+	CObject3D* RootObj()
+	{
+		return m_pScene;
+	}
+
+	void ClearScene();
+
+	void UpdateAllViews(CWnd* pSender, OP op, CObject3D* pHint);
+	void RegisterView(CViewPane* pView)
+	{
+		bool registered = false;
+		for(std::list<CViewPane*>::iterator it = m_lstViews.begin()\
+			; !registered && it != m_lstViews.end()
+			; it ++)
+		{
+			registered = (*it == pView);
+		}
+		if (!registered)
+			m_lstViews.push_back(pView);
+	}
+
 protected:
 
 // Generated message map functions
 protected:
 	DECLARE_MESSAGE_MAP()
+
+
 
 #ifdef SHARED_HANDLERS
 	// Helper function that sets search content for a Search Handler
@@ -47,5 +72,14 @@ protected:
 #endif // SHARED_HANDLERS
 
 private:
-	CObArray m_arrObjs;
+
+#ifdef TEST_SIERALIZATION
+	void TestBasicSerialization(CArchive& ar);
+	void TestTreeSerialization(CArchive& ar);
+#endif
+
+
+	CScene* m_pScene;
+	std::list<CViewPane*> m_lstViews;
+
 };

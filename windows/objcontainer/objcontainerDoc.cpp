@@ -14,6 +14,8 @@
 #include <propkey.h>
 
 #include "Object3D.h"
+#include <queue>
+#include "ViewPane.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -29,7 +31,7 @@ END_MESSAGE_MAP()
 
 // CobjcontainerDoc construction/destruction
 
-CobjcontainerDoc::CobjcontainerDoc()
+CobjcontainerDoc::CobjcontainerDoc() : m_pScene(NULL)
 {
 	// TODO: add one-time construction code here
 
@@ -37,19 +39,66 @@ CobjcontainerDoc::CobjcontainerDoc()
 
 CobjcontainerDoc::~CobjcontainerDoc()
 {
+	ClearScene();
+}
+
+void CobjcontainerDoc::ClearScene()
+{
+	if (NULL != m_pScene)
+	{
+		std::queue<CObject3D*> q;
+		q.push(m_pScene);
+		while (!q.empty())
+		{
+			CObject3D* n = q.front();
+			CObject3D* c = n->GetFirstChild();
+			while(c)
+			{
+				q.push(c);
+				c = c->GetNextSibbling();
+			}
+			q.pop();
+			delete n;
+		}
+		m_pScene = NULL;
+	}
 }
 
 BOOL CobjcontainerDoc::OnNewDocument()
 {
+	ClearScene();
 	if (!CDocument::OnNewDocument())
 		return FALSE;
 
 	// TODO: add reinitialization code here
 	// (SDI documents will reuse this document)
-
+	m_pScene = new CScene();
 	return TRUE;
 }
 
+BOOL CobjcontainerDoc::OnOpenDocument(LPCTSTR lpszPathName)
+{
+	ClearScene();
+	if (!CDocument::OnOpenDocument(lpszPathName))
+		return FALSE;
+	return TRUE;
+}
+
+void CobjcontainerDoc::UpdateAllViews(CWnd* pSender, CobjcontainerDoc::OP op, CObject3D* pHint)
+{
+	if (pSender->IsKindOf(RUNTIME_CLASS(CView)))
+	{
+		CDocument::UpdateAllViews(static_cast<CView*>(pSender), LPARAM(op), pHint);
+		pSender = NULL;
+	}
+	else
+		CDocument::UpdateAllViews(NULL, op, pHint);
+	for (std::list<CViewPane*>::iterator it = m_lstViews.begin(); it != m_lstViews.end(); it ++)
+	{
+		CViewPane* pView = *it;
+		pView->OnUpdate(pSender, op, pHint);
+	}
+}
 
 
 
@@ -57,33 +106,205 @@ BOOL CobjcontainerDoc::OnNewDocument()
 
 void CobjcontainerDoc::Serialize(CArchive& ar)
 {
+#ifdef TEST_SIERALIZATION
+	TestBasicSerialization(ar);
+	TestTreeSerialization(ar);
+#endif
 	if (ar.IsStoring())
 	{
-		// TODO: add storing code here
-#ifdef TEST_SIERALIZATION
-		srand(::GetTickCount());
-		CObject3D *pObj = new CObject3D();
-		m_arrObjs.Add(pObj);
-		CObject3D *pObj2 = new CObject3D();
-		m_arrObjs.Add(pObj2);
-		m_arrObjs.Serialize(ar);
-		m_arrObjs.RemoveAll();
-		delete pObj;
-		delete pObj2;
-#endif
+		std::queue<CObject3D*> tq2;
+		tq2.push(m_pScene);
+		CObArray poolObjs;
+		while(!tq2.empty())
+		{
+			CObject3D* n = tq2.front();
+			tq2.pop();
+			CObject3D* c = n->GetFirstChild();
+			while (c)
+			{
+				tq2.push(c);
+				c = c->GetNextSibbling();
+			}
+			n->SaveTreeNode(poolObjs);
+		}
+		poolObjs.Serialize(ar);
 	}
 	else
 	{
-#ifdef TEST_SIERALIZATION
-		m_arrObjs.Serialize(ar);
-		INT_PTR sz = m_arrObjs.GetSize();
-		for (INT_PTR i = 0; i < sz; i ++)
-			delete m_arrObjs.GetAt(i);
-		m_arrObjs.RemoveAll();
-#endif
-	}
+		CObArray poolObjs;
+		poolObjs.Serialize(ar);
+		if (!poolObjs.IsEmpty())
+		{
+			CObject* pObj = poolObjs.GetAt(0);
+			ASSERT(pObj->IsKindOf(RUNTIME_CLASS(CObject3D)));
+			CObject3D* root = static_cast<CObject3D*>(pObj);
+			for (int i = 0; i < poolObjs.GetCount(); i ++)
+			{
+				pObj = poolObjs.GetAt(i);
+				ASSERT(pObj->IsKindOf(RUNTIME_CLASS(CObject3D)));
+				CObject3D* node = static_cast<CObject3D*>(pObj);
+				node->RestoreTreeNode(poolObjs);
+			}
 
+			ASSERT(root->IsKindOf(RUNTIME_CLASS(CScene)));
+			m_pScene = static_cast<CScene*>(root);
+		}
+	}
 }
+
+#ifdef TEST_SIERALIZATION
+void CobjcontainerDoc::TestBasicSerialization(CArchive& ar)
+{
+	CObArray arrObjs;
+	if (ar.IsStoring())
+	{
+		// TODO: add storing code here
+		TRACE(_T("Storing...\n"));
+		srand(::GetTickCount());
+		CObject3D *pObj = new CObject3D();
+		arrObjs.Add(pObj);
+		CObject3D *pObj2 = new CObject3D();
+		arrObjs.Add(pObj2);
+		arrObjs.Serialize(ar);
+		arrObjs.RemoveAll();
+		pObj->DumpData();
+		pObj2->DumpData();
+		delete pObj;
+		delete pObj2;
+	}
+	else
+	{
+		TRACE(_T("Loading...\n"));
+		arrObjs.Serialize(ar);
+		INT_PTR sz = arrObjs.GetSize();
+		for (INT_PTR i = 0; i < sz; i ++)
+		{
+			CObject *pObj = arrObjs.GetAt(i);
+			ASSERT(pObj->IsKindOf(RUNTIME_CLASS(CObject3D)));
+			(static_cast<CObject3D*>(pObj))->DumpData();
+			delete pObj;
+		}
+		arrObjs.RemoveAll();
+	}
+}
+
+void CobjcontainerDoc::TestTreeSerialization(CArchive& ar)
+{
+	CObArray arrObjs;
+	if (ar.IsStoring())
+	{
+		TRACE(_T("Storing Tree...\n"));
+		const int c_nullIdx = -1;
+		struct stNode {
+			int id;
+			int left;
+			int right;
+			CObject3D* obj;
+		} nodes [] = {
+			{0, 1, 2, NULL}
+			, {1, 3, 4, NULL}
+			, {2, c_nullIdx, c_nullIdx, NULL}
+			, {3, c_nullIdx, c_nullIdx, NULL}
+			, {4, c_nullIdx, c_nullIdx, NULL}
+		};
+
+		TRACE(_T("Source tree...\n"));
+		std::queue<stNode*> tq;
+		CObject3D* root = new CObject3D();
+		root->setNodeId(nodes[0].id);
+		nodes[0].obj = root;
+		tq.push(&nodes[0]);
+		while(!tq.empty())
+		{
+			stNode* n = tq.front();
+			tq.pop();
+			TRACE(_T("%d: %d %d\n"), n->id, n->left, n->right);
+
+			int iChildren[] = {n->left, n->right};
+			CObject3D* nP = n->obj;
+			for (int ic = 0; ic < sizeof(iChildren)/sizeof(int); ic ++)
+			{
+				if (c_nullIdx != iChildren[ic])
+				{
+					CObject3D* nC = new CObject3D();
+					nC->setNodeId(nodes[iChildren[ic]].id);
+					nodes[iChildren[ic]].obj = nC;
+					nP->AddChild(nC);
+					tq.push(&nodes[iChildren[ic]]);
+				}
+			}
+		}
+
+		TRACE(_T("Destination tree...\n"));
+		std::queue<CObject3D*> tq2;
+		tq2.push(root);
+		CObArray poolObjs;
+		while(!tq2.empty())
+		{
+			CObject3D* n = tq2.front();
+			tq2.pop();
+			TRACE(_T("%d:"), n->getNodeId());
+			CObject3D* c = n->GetFirstChild();
+			while (c)
+			{
+				TRACE(_T(" %d"), c->getNodeId());
+				tq2.push(c);
+				c = c->GetNextSibbling();
+			}
+			TRACE(_T("\n"));
+			n->SaveTreeNode(poolObjs);
+		}
+		poolObjs.Serialize(ar);
+		for (int i = 0; i < poolObjs.GetCount(); i ++)
+		{
+			CObject* obj = poolObjs.GetAt(i);
+			delete obj;
+		}
+		poolObjs.RemoveAll();
+	}
+	else
+	{
+		TRACE(_T("Loading Tree...\n"));
+		CObArray poolObjs;
+		poolObjs.Serialize(ar);
+		if (!poolObjs.IsEmpty())
+		{
+			CObject* pObj = poolObjs.GetAt(0);
+			ASSERT(pObj->IsKindOf(RUNTIME_CLASS(CObject3D)));
+			CObject3D* root = static_cast<CObject3D*>(pObj);
+			for (int i = 0; i < poolObjs.GetCount(); i ++)
+			{
+				pObj = poolObjs.GetAt(i);
+				ASSERT(pObj->IsKindOf(RUNTIME_CLASS(CObject3D)));
+				CObject3D* node = static_cast<CObject3D*>(pObj);
+				node->RestoreTreeNode(poolObjs);
+			}
+
+			std::queue<CObject3D*> tq;
+			tq.push(root);
+			while(!tq.empty())
+			{
+				CObject3D* n = tq.front();
+				tq.pop();
+				TRACE(_T("%d:"), n->getNodeId());
+				CObject3D* c = n->GetFirstChild();
+				while (c)
+				{
+					TRACE(_T(" %d"), c->getNodeId());
+					tq.push(c);
+					c = c->GetNextSibbling();
+				}
+				TRACE(_T("\n"));
+			}
+
+			for (int i = 0; i < poolObjs.GetCount(); i ++)
+				delete poolObjs.GetAt(i);
+			poolObjs.RemoveAll();
+		}
+	}
+}
+
+#endif
 
 #ifdef SHARED_HANDLERS
 
@@ -136,6 +357,7 @@ void CobjcontainerDoc::SetSearchContent(const CString& value)
 		}
 	}
 }
+
 
 #endif // SHARED_HANDLERS
 

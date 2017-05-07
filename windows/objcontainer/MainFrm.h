@@ -3,7 +3,7 @@
 //
 
 #pragma once
-#include "ClassView.h"
+#include "ViewObjHierarchy.h"
 #include "OutputWnd.h"
 #include "PropertiesWnd.h"
 
@@ -38,7 +38,7 @@ protected:  // control bar embedded members
 	CMFCToolBar       m_wndToolBar;
 	CMFCStatusBar     m_wndStatusBar;
 	CMFCToolBarImages m_UserImages;
-	CClassView        m_wndClassView;
+	CViewObjHierarchy        m_wndObjsView;
 	COutputWnd        m_wndOutput;
 	CPropertiesWnd    m_wndProperties;
 
