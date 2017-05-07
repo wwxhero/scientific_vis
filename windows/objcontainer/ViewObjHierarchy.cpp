@@ -347,7 +347,7 @@ void CViewObjHierarchy::FillObjHierarchy()
 
 }
 
-void CViewObjHierarchy::Reload(Item& unit)
+void CViewObjHierarchy::Reload(Item& unit, bool expand)
 {
 	UINT uMask = TVIF_IMAGE|TVIF_PARAM|TVIF_SELECTEDIMAGE|TVIF_TEXT;
 	UINT nState = TVIS_BOLD;
@@ -389,6 +389,8 @@ void CViewObjHierarchy::Reload(Item& unit)
 			unitNext.pItem = unitNext.pItem->GetNextSibbling();;
 		}
 	}
+	UINT nCode = expand?TVE_EXPAND:TVE_COLLAPSE;
+	m_wndObjsTreeView.Expand(unit.hItem, nCode);
 }
 
 void CViewObjHierarchy::OnContextMenu(CWnd* pWnd, CPoint point)
