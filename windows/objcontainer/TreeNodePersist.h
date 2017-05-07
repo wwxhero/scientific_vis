@@ -35,6 +35,7 @@ public:
 		else
 			pThis->m_nextSibbling = NULL;
 	}
+
 	void Serialize(CArchive& ar)
 	{
 		if (ar.IsStoring())
@@ -42,10 +43,17 @@ public:
 			TThis* pThis = static_cast<TThis*>(this);
 			if (NULL != pThis->m_parent)
 				m_idx[parent] = pThis->m_parent->m_idx[self];
+			else
+				m_idx[parent] = IDX_NULL;
 			if (NULL != pThis->m_firstChild)
 				m_idx[firstchild] = pThis->m_firstChild->m_idx[self];
+			else
+				m_idx[firstchild] = IDX_NULL;
 			if (NULL != pThis->m_nextSibbling)
 				m_idx[nextsibbling] = pThis->m_nextSibbling->m_idx[self];
+			else
+				m_idx[nextsibbling] = IDX_NULL;
+
 			for (int i = 0; i < total; i ++)
 				ar << m_idx[i];
 #ifdef TEST_SIERALIZATION

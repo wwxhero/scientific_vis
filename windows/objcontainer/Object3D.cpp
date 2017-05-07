@@ -96,22 +96,22 @@ void CObject3D::RemoveSelf()
 	if (p)
 	{
 		CObject3D* s = p->GetFirstChild();
-		CObject3D* sp = NULL;
+		CObject3D* sm = NULL;
 		while(s)
 		{
 			if (s == this)
 			{
-				if (NULL == sp)
+				if (NULL == sm)
 				{
 					p->m_firstChild = s->m_nextSibbling;
 				}
 				else
 				{
-					sp->m_nextSibbling = s->m_nextSibbling;
+					sm->m_nextSibbling = s->m_nextSibbling;
 				}
 				break;
 			}
-			sp = s;
+			sm = s;
 			s = s->GetNextSibbling();
 		}
 	}
