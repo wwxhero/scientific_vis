@@ -5,7 +5,7 @@
 #pragma once
 #include "ViewObjHierarchy.h"
 #include "OutputWnd.h"
-#include "PropertiesWnd.h"
+#include "ViewProperties.h"
 
 class CMainFrame : public CFrameWndEx
 {
@@ -40,7 +40,7 @@ protected:  // control bar embedded members
 	CMFCToolBarImages m_UserImages;
 	CViewObjHierarchy        m_wndObjsView;
 	COutputWnd        m_wndOutput;
-	CPropertiesWnd    m_wndProperties;
+	CViewProperties    m_wndProperties;
 
 // Generated message map functions
 protected:

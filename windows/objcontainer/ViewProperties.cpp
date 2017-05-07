@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 
-#include "PropertiesWnd.h"
+#include "ViewProperties.h"
 #include "Resource.h"
 #include "MainFrm.h"
 #include "objcontainer.h"
@@ -15,15 +15,15 @@ static char THIS_FILE[]=__FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CResourceViewBar
 
-CPropertiesWnd::CPropertiesWnd()
+CViewProperties::CViewProperties()
 {
 }
 
-CPropertiesWnd::~CPropertiesWnd()
+CViewProperties::~CViewProperties()
 {
 }
 
-BEGIN_MESSAGE_MAP(CPropertiesWnd, CDockablePane)
+BEGIN_MESSAGE_MAP(CViewProperties, CDockablePane)
 	ON_WM_CREATE()
 	ON_WM_SIZE()
 	ON_COMMAND(ID_EXPAND_ALL, OnExpandAllProperties)
@@ -42,7 +42,7 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // CResourceViewBar message handlers
 
-void CPropertiesWnd::AdjustLayout()
+void CViewProperties::AdjustLayout()
 {
 	if (GetSafeHwnd() == NULL)
 	{
@@ -62,12 +62,12 @@ void CPropertiesWnd::AdjustLayout()
 	m_wndPropList.SetWindowPos(NULL, rectClient.left, rectClient.top + cyCmb + cyTlb, rectClient.Width(), rectClient.Height() -(cyCmb+cyTlb), SWP_NOACTIVATE | SWP_NOZORDER);
 }
 
-void CPropertiesWnd::OnUpdate(CWnd* pSender, CobjcontainerDoc::OP op, CObject3D* obj)
+void CViewProperties::OnUpdate(CWnd* pSender, CobjcontainerDoc::OP op, CObject3D* obj)
 {
-	TRACE(_T("CPropertiesWnd::OnUpdate\n"));
+	TRACE(_T("CViewProperties::OnUpdate\n"));
 }
 
-LRESULT CPropertiesWnd::OnInitialUpdate(WPARAM, LPARAM)
+LRESULT CViewProperties::OnInitialUpdate(WPARAM, LPARAM)
 {
 	CobjcontainerDoc* pDoc = GetDocument();
 	pDoc->RegisterView(this);
@@ -75,7 +75,7 @@ LRESULT CPropertiesWnd::OnInitialUpdate(WPARAM, LPARAM)
 }
 
 
-int CPropertiesWnd::OnCreate(LPCREATESTRUCT lpCreateStruct)
+int CViewProperties::OnCreate(LPCREATESTRUCT lpCreateStruct)
 {
 	if (CDockablePane::OnCreate(lpCreateStruct) == -1)
 		return -1;
@@ -120,52 +120,52 @@ int CPropertiesWnd::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	return 0;
 }
 
-void CPropertiesWnd::OnSize(UINT nType, int cx, int cy)
+void CViewProperties::OnSize(UINT nType, int cx, int cy)
 {
 	CDockablePane::OnSize(nType, cx, cy);
 	AdjustLayout();
 }
 
-void CPropertiesWnd::OnExpandAllProperties()
+void CViewProperties::OnExpandAllProperties()
 {
 	m_wndPropList.ExpandAll();
 }
 
-void CPropertiesWnd::OnUpdateExpandAllProperties(CCmdUI* /* pCmdUI */)
+void CViewProperties::OnUpdateExpandAllProperties(CCmdUI* /* pCmdUI */)
 {
 }
 
-void CPropertiesWnd::OnSortProperties()
+void CViewProperties::OnSortProperties()
 {
 	m_wndPropList.SetAlphabeticMode(!m_wndPropList.IsAlphabeticMode());
 }
 
-void CPropertiesWnd::OnUpdateSortProperties(CCmdUI* pCmdUI)
+void CViewProperties::OnUpdateSortProperties(CCmdUI* pCmdUI)
 {
 	pCmdUI->SetCheck(m_wndPropList.IsAlphabeticMode());
 }
 
-void CPropertiesWnd::OnProperties1()
+void CViewProperties::OnProperties1()
 {
 	// TODO: Add your command handler code here
 }
 
-void CPropertiesWnd::OnUpdateProperties1(CCmdUI* /*pCmdUI*/)
+void CViewProperties::OnUpdateProperties1(CCmdUI* /*pCmdUI*/)
 {
 	// TODO: Add your command update UI handler code here
 }
 
-void CPropertiesWnd::OnProperties2()
+void CViewProperties::OnProperties2()
 {
 	// TODO: Add your command handler code here
 }
 
-void CPropertiesWnd::OnUpdateProperties2(CCmdUI* /*pCmdUI*/)
+void CViewProperties::OnUpdateProperties2(CCmdUI* /*pCmdUI*/)
 {
 	// TODO: Add your command update UI handler code here
 }
 
-void CPropertiesWnd::InitPropList()
+void CViewProperties::InitPropList()
 {
 	SetPropListFont();
 
@@ -248,19 +248,19 @@ void CPropertiesWnd::InitPropList()
 	m_wndPropList.AddProperty(pGroup4);
 }
 
-void CPropertiesWnd::OnSetFocus(CWnd* pOldWnd)
+void CViewProperties::OnSetFocus(CWnd* pOldWnd)
 {
 	CDockablePane::OnSetFocus(pOldWnd);
 	m_wndPropList.SetFocus();
 }
 
-void CPropertiesWnd::OnSettingChange(UINT uFlags, LPCTSTR lpszSection)
+void CViewProperties::OnSettingChange(UINT uFlags, LPCTSTR lpszSection)
 {
 	CDockablePane::OnSettingChange(uFlags, lpszSection);
 	SetPropListFont();
 }
 
-void CPropertiesWnd::SetPropListFont()
+void CViewProperties::SetPropListFont()
 {
 	::DeleteObject(m_fntPropList.Detach());
 

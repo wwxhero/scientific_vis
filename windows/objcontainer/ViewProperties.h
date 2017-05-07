@@ -12,11 +12,11 @@ public:
 	virtual BOOL AllowShowOnList() const { return FALSE; }
 };
 
-class CPropertiesWnd : public CViewPane
+class CViewProperties : public CViewPane
 {
 // Construction
 public:
-	CPropertiesWnd();
+	CViewProperties();
 
 	void AdjustLayout();
 
@@ -37,7 +37,7 @@ protected:
 
 // Implementation
 public:
-	virtual ~CPropertiesWnd();
+	virtual ~CViewProperties();
 
 protected:
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
