@@ -63,7 +63,7 @@ const CViewObjHierarchy::TREEITEM CViewObjHierarchy::TreeItem(LPCSTR name)
 		; c_invalid == item && i < sizeof(s_funcObjTreeItem)/sizeof(FuncObjTreeItem)
 		; i ++)
 	{
-		if (name == s_funcObjTreeItem[i].x)
+		if (0 == strcmp(name,s_funcObjTreeItem[i].x))
 			item = s_funcObjTreeItem[i].y;
 	}
 	return item;
@@ -141,7 +141,114 @@ BOOL CViewObjHierarchy::OnNotify(WPARAM wParam, LPARAM lParam, LRESULT* pResult)
 			CobjcontainerDoc* pDoc = GetDocument();
 			pDoc->UpdateAllViews(this, CobjcontainerDoc::OP_SEL, item.pItem);
 		}
+		else if (pNMHDR && pNMHDR->code == TVN_BEGINDRAG)
+		{
+			struct _DragOP
+			{
+				Item from;
+				Item to;
+			} op = {
+				{NULL, NULL}
+				, {NULL, NULL}
+			};
+
+			enum {Dragging, Dropping} state;
+			state = Dragging;
+
+			LPNMTREEVIEW pnmtv = (LPNMTREEVIEW)lParam;
+			op.from.hItem = pnmtv->itemNew.hItem;
+			op.from.pItem = (CObject3D*)pnmtv->itemNew.lParam;
+
+			if (!op.from.pItem->IsKindOf(RUNTIME_CLASS(CScene)))
+			{
+				CImageList* lstImg = m_wndObjsTreeView.CreateDragImage(op.from.hItem);
+				IMAGEINFO info;
+				lstImg->GetImageInfo(0, &info);
+				CRect rcImg(info.rcImage);
+				lstImg->BeginDrag(0, rcImg.CenterPoint());
+				CImageList::DragEnter(&m_wndObjsTreeView, pnmtv->ptDrag);
+				m_wndObjsTreeView.SetCapture();
+
+				while (state == Dragging)
+				{
+					MSG msg;
+					::GetMessage(&msg, NULL, WM_MOUSEFIRST, WM_MOUSELAST);
+					if (msg.message == WM_MOUSEMOVE
+						&& msg.wParam == MK_LBUTTON)
+					{
+						CPoint pt(GET_X_LPARAM(msg.lParam), GET_Y_LPARAM(msg.lParam));
+						CImageList::DragMove(pt);
+						CImageList::DragShowNolock(false);
+						UINT uFlags = 0;
+						HTREEITEM hItem = m_wndObjsTreeView.HitTest(pt, &uFlags);
+						//if ((hItem != NULL) && (TVHT_ONITEM & uFlags))
+						if (NULL != hItem )
+						{
+							m_wndObjsTreeView.SelectDropTarget(hItem);
+						}
+						CImageList::DragShowNolock(true);
+
+					}
+					else if (msg.message == WM_LBUTTONUP)
+					{
+						state = Dropping;
+						CPoint pt(GET_X_LPARAM(msg.lParam), GET_Y_LPARAM(msg.lParam));
+						op.to.hItem = m_wndObjsTreeView.HitTest(pt);
+						TVITEM item;
+						item.mask = TVIF_PARAM;
+						item.hItem = op.to.hItem;
+						m_wndObjsTreeView.GetItem(&item);
+						op.to.pItem = (CObject3D *)(item.lParam);
+						CImageList::DragLeave(&m_wndObjsTreeView);
+						CImageList::EndDrag();
+						ReleaseCapture();
+					}
+					else
+						::DispatchMessage(&msg);
+
+				}
+
+				if (NULL != op.to.hItem
+					&& NULL != op.to.pItem)
+				{
+					m_wndObjsTreeView.SelectDropTarget(NULL);
+					TRACE(_T("%s->%s\n"), op.from.pItem->GetRuntimeClass()->m_lpszClassName, op.to.pItem->GetRuntimeClass()->m_lpszClassName);
+					if (CObject3D::Connect(op.to.pItem, op.from.pItem))
+					{
+						CobjcontainerDoc* pDoc = GetDocument();
+						pDoc->UpdateAllViews(this, CobjcontainerDoc::OP_CNN_PARENT, op.to.pItem);
+						pDoc->UpdateAllViews(this, CobjcontainerDoc::OP_CNN_CHILD, op.from.pItem);
+#if !defined TEST_CNN
+						m_wndObjsTreeView.DeleteItem(op.from.hItem);
+						HTREEITEM c = m_wndObjsTreeView.GetChildItem(op.to.hItem);
+						while(c != NULL)
+						{
+							HTREEITEM n = m_wndObjsTreeView.GetNextSiblingItem(c);
+							m_wndObjsTreeView.DeleteItem(c);
+							c = n;
+						}
+						Reload(op.to);
+#endif
+					}
+					else
+						AfxMessageBox(_T("Not a legal tree if the node is dropped there!!!"));
+
+#ifdef TEST_CNN
+					m_wndObjsTreeView.DeleteAllItems();
+					FillObjHierarchy();
+#endif
+
+				}
+				//SetCursor(cursorRestore);
+				delete lstImg;
+				//m_wndObjsTreeView.Invalidate();
+			}
+
+		}
+
+
 	}
+
 	return CDockablePane::OnNotify(wParam, lParam, pResult);
 }
 
@@ -234,30 +341,39 @@ void CViewObjHierarchy::FillObjHierarchy()
 										, lParam
 										, hParent
 										, hInsertAfter);
-	typedef struct stTreeNodeInitializer
-	{
-		CObject3D* from;
-		HTREEITEM to;
-	} TreeNodeInitializer;
-	std::queue<TreeNodeInitializer> queBFS;
-	TreeNodeInitializer unit = {root, hRoot};
+
+	Item unit = {hRoot, root};
+	Reload(unit);
+
+}
+
+void CViewObjHierarchy::Reload(Item& unit)
+{
+	UINT uMask = TVIF_IMAGE|TVIF_PARAM|TVIF_SELECTEDIMAGE|TVIF_TEXT;
+	UINT nState = TVIS_BOLD;
+	UINT nStateMask = TVIS_BOLD;
+
+	CRuntimeClass *prt = NULL;
+	CString str;
+
+	std::queue<Item> queBFS;
 	queBFS.push(unit);
 	while(!queBFS.empty())
 	{
-		TreeNodeInitializer unitThis = queBFS.front();
+		Item unitThis = queBFS.front();
 		queBFS.pop();
-		TreeNodeInitializer unitNext = {unitThis.from->GetFirstChild(), NULL};
-		hParent = unitThis.to;
-		hInsertAfter = NULL;
-		while (NULL != unitNext.from)
-		{
-			prt = unitNext.from->GetRuntimeClass();
-			nImg = TreeItem(prt->m_lpszClassName);
-			nSelectedImg = TreeItem(prt->m_lpszClassName);
+		Item unitNext = {NULL, unitThis.pItem->GetFirstChild()};
+		HTREEITEM hParent = unitThis.hItem;
+		HTREEITEM hInsertAfter = NULL;
 
-			unitNext.from->GetName(str);
-			lParam = (LPARAM)unitNext.from;
-			unitNext.to = m_wndObjsTreeView.InsertItem(
+		while (NULL != unitNext.pItem)
+		{
+			prt = unitNext.pItem->GetRuntimeClass();
+			UINT nImg = TreeItem(prt->m_lpszClassName);
+			UINT nSelectedImg = TreeItem(prt->m_lpszClassName);
+			unitNext.pItem->GetName(str);
+			LPARAM lParam = (LPARAM)unitNext.pItem;
+			unitNext.hItem = m_wndObjsTreeView.InsertItem(
 										uMask
 										, str
 										, nImg
@@ -269,8 +385,8 @@ void CViewObjHierarchy::FillObjHierarchy()
 										, hInsertAfter);
 			queBFS.push(unitNext);
 
-			hInsertAfter = unitNext.to;
-			unitNext.from = unitNext.from->GetNextSibbling();;
+			hInsertAfter = unitNext.hItem;
+			unitNext.pItem = unitNext.pItem->GetNextSibbling();;
 		}
 	}
 }

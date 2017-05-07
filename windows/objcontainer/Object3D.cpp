@@ -5,6 +5,7 @@
 #include <queue>
 #include "objcontainer.h"
 #include "Object3D.h"
+#include "Scene.h"
 
 
 
@@ -115,6 +116,38 @@ void CObject3D::RemoveSelf()
 		}
 	}
 	delete this;
+}
+
+bool CObject3D::Connect(CObject3D* parent, CObject3D* child)
+{
+	ASSERT(!child->IsKindOf(RUNTIME_CLASS(CScene)));
+	CObject3D* ancestor = parent;
+	bool cycle = false;
+	while(!cycle
+		&& NULL != ancestor)
+	{
+		cycle = (ancestor == child);
+		ancestor = ancestor->m_parent;
+	}
+	if (!cycle)
+	{
+		if (NULL != child->m_parent)
+		{
+			CObject3D** cnn = &child->m_parent->m_firstChild;
+			while(NULL != *cnn)
+			{
+				if (*cnn == child)
+				{
+					*cnn = child->m_nextSibbling;
+					child->m_nextSibbling = NULL;
+					break;
+				}
+				cnn = &(*cnn)->m_nextSibbling;
+			}
+		}
+		parent->AddChild(child);
+	}
+	return !cycle;
 }
 
 // CObject3D member functions

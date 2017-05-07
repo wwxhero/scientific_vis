@@ -26,6 +26,8 @@ public:
 		strName = _T("Generic 3D Object");
 	}
 	virtual void RemoveSelf();
+
+	static bool Connect(CObject3D* parent, CObject3D* child);
 private:
 	virtual void Serialize(CArchive& ar);
 

@@ -15,7 +15,7 @@ protected: // create from serialization only
 
 // Attributes
 public:
-	enum OP {OP_SEL = 0, OP_NEW, OP_DEL };
+	enum OP {OP_SEL = 0, OP_NEW, OP_DEL, OP_CNN_PARENT, OP_CNN_CHILD };
 // Operations
 public:
 
@@ -39,7 +39,7 @@ public:
 
 	CObject3D* RootObj()
 	{
-		return &m_scene;
+		return m_pScene;
 	}
 
 	void ClearScene();
@@ -79,7 +79,7 @@ private:
 #endif
 
 
-	CScene m_scene;
+	CScene* m_pScene;
 	std::list<CViewPane*> m_lstViews;
 
 };

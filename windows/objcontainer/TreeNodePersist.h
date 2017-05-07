@@ -24,10 +24,16 @@ public:
 		TThis* pThis = static_cast<TThis*>(this);
 		if (IDX_NULL != m_idx[parent])
 			pThis->m_parent = static_cast<TThis*>(arr.GetAt(m_idx[parent]));
+		else
+			pThis->m_parent = NULL;
 		if (IDX_NULL != m_idx[firstchild])
 			pThis->m_firstChild = static_cast<TThis*>(arr.GetAt(m_idx[firstchild]));
+		else
+			pThis->m_firstChild = NULL;
 		if (IDX_NULL != m_idx[nextsibbling])
 			pThis->m_nextSibbling = static_cast<TThis*>(arr.GetAt(m_idx[nextsibbling]));
+		else
+			pThis->m_nextSibbling = NULL;
 	}
 	void Serialize(CArchive& ar)
 	{

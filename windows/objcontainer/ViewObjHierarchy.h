@@ -61,6 +61,7 @@ private:
 	} Item;
 
 	void GetSelectedItem(Item& item);
+	void Reload(Item& item);
 
 protected:
 	CClassToolBar m_wndToolBar;

@@ -31,7 +31,7 @@ END_MESSAGE_MAP()
 
 // CobjcontainerDoc construction/destruction
 
-CobjcontainerDoc::CobjcontainerDoc()
+CobjcontainerDoc::CobjcontainerDoc() : m_pScene(NULL)
 {
 	// TODO: add one-time construction code here
 
@@ -44,27 +44,24 @@ CobjcontainerDoc::~CobjcontainerDoc()
 
 void CobjcontainerDoc::ClearScene()
 {
-	std::queue<CObject3D*> q;
-	q.push(&m_scene);
-	std::list<CObject3D*> l;
-	while (!q.empty())
+	if (NULL != m_pScene)
 	{
-		CObject3D* n = q.front();
-		CObject3D* c = n->GetFirstChild();
-		while(c)
+		std::queue<CObject3D*> q;
+		q.push(m_pScene);
+		while (!q.empty())
 		{
-			q.push(c);
-			c = c->GetNextSibbling();
+			CObject3D* n = q.front();
+			CObject3D* c = n->GetFirstChild();
+			while(c)
+			{
+				q.push(c);
+				c = c->GetNextSibbling();
+			}
+			q.pop();
+			delete n;
 		}
-		q.pop();
-		l.push_back(n);
+		m_pScene = NULL;
 	}
-
-	std::list<CObject3D*>::iterator it = l.end();
-	it --;
-	for(; it != l.begin(); it --)
-		delete *it;
-	m_scene.Reset();
 }
 
 BOOL CobjcontainerDoc::OnNewDocument()
@@ -75,7 +72,7 @@ BOOL CobjcontainerDoc::OnNewDocument()
 
 	// TODO: add reinitialization code here
 	// (SDI documents will reuse this document)
-
+	m_pScene = new CScene();
 	return TRUE;
 }
 
@@ -110,13 +107,13 @@ void CobjcontainerDoc::UpdateAllViews(CWnd* pSender, CobjcontainerDoc::OP op, CO
 void CobjcontainerDoc::Serialize(CArchive& ar)
 {
 #ifdef TEST_SIERALIZATION
-	//TestBasicSerialization(ar);
-	//TestTreeSerialization(ar);
+	TestBasicSerialization(ar);
+	TestTreeSerialization(ar);
 #endif
 	if (ar.IsStoring())
 	{
 		std::queue<CObject3D*> tq2;
-		tq2.push(&m_scene);
+		tq2.push(m_pScene);
 		CObArray poolObjs;
 		while(!tq2.empty())
 		{
@@ -150,8 +147,7 @@ void CobjcontainerDoc::Serialize(CArchive& ar)
 			}
 
 			ASSERT(root->IsKindOf(RUNTIME_CLASS(CScene)));
-			m_scene.Reset(static_cast<CScene*>(root));
-			delete root;
+			m_pScene = static_cast<CScene*>(root);
 		}
 	}
 }
