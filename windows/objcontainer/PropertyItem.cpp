@@ -2,7 +2,7 @@
 #include "PropertyItem.h"
 
 
-CPropertyItem::CPropertyItem(const CString& strName, const _variant_t& v, Pipe pipe, LPCTSTR lpszDescr) 
+CPropertyItem::CPropertyItem(const CString& strName, const _variant_t& v, Pipe pipe, LPCTSTR lpszDescr)
 	: CMFCPropertyGridProperty(strName, v, lpszDescr)
 	, m_pipe(pipe)
 {
@@ -26,7 +26,7 @@ bool CPropertyItem::Update(CObject3D* pObj, bool bObj2Prop)
 	else
 	{
 		v = GetValue();
-		done = m_pipe.set(pObj, v); 
+		done = m_pipe.set(pObj, v);
 	}
 	return done;
 }
