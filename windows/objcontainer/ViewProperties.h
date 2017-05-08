@@ -1,6 +1,7 @@
 
 #pragma once
 #include "ViewPane.h"
+#include "PropertyGridCtrlObject3D.h"
 class CPropertiesToolBar : public CMFCToolBar
 {
 public:
@@ -33,7 +34,8 @@ protected:
 	CFont m_fntPropList;
 	//CComboBox m_wndObjectCombo;
 	CPropertiesToolBar m_wndToolBar;
-	CMFCPropertyGridCtrl m_wndPropList;
+	CPropertyGridCtrlObject3D m_wndPropList;
+	CObject3D* m_pActObj;
 
 // Implementation
 public:
@@ -52,10 +54,16 @@ protected:
 	afx_msg void OnUpdateProperties2(CCmdUI* pCmdUI);
 	afx_msg void OnSetFocus(CWnd* pOldWnd);
 	afx_msg void OnSettingChange(UINT uFlags, LPCTSTR lpszSection);
+	afx_msg LRESULT OnPropertyChanged(WPARAM wp,LPARAM lp);
 	afx_msg LRESULT OnInitialUpdate(WPARAM, LPARAM);
 	DECLARE_MESSAGE_MAP()
 
 	void InitPropList();
+	void InitPropListObsolete();
+	void UpdatePropList();
 	void SetPropListFont();
+
+
+
 };
 

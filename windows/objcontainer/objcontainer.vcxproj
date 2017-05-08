@@ -136,6 +136,12 @@
   <ItemGroup>
     <ClInclude Include="Box.h" />
     <ClInclude Include="ObjectWaveFront.h" />
+    <ClInclude Include="PropertyGridGroup.h" />
+    <ClInclude Include="PropertyGridBox.h" />
+    <ClInclude Include="PropertyGridCtrlObject3D.h" />
+    <ClInclude Include="PropertyGridObject3D.h" />
+    <ClInclude Include="PropertyGridScene.h" />
+    <ClInclude Include="PropertyGridWF.h" />
     <ClInclude Include="ViewObjHierarchy.h" />
     <ClInclude Include="MainFrm.h" />
     <ClInclude Include="objcontainer.h" />
@@ -156,6 +162,12 @@
   <ItemGroup>
     <ClCompile Include="Box.cpp" />
     <ClCompile Include="ObjectWaveFront.cpp" />
+    <ClCompile Include="PropertyGridGroup.cpp" />
+    <ClCompile Include="PropertyGridBox.cpp" />
+    <ClCompile Include="PropertyGridCtrlObject3D.cpp" />
+    <ClCompile Include="PropertyGridObject3D.cpp" />
+    <ClCompile Include="PropertyGridScene.cpp" />
+    <ClCompile Include="PropertyGridWF.cpp" />
     <ClCompile Include="ViewObjHierarchy.cpp" />
     <ClCompile Include="MainFrm.cpp" />
     <ClCompile Include="objcontainer.cpp" />

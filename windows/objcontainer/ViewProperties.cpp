@@ -15,7 +15,7 @@ static char THIS_FILE[]=__FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CResourceViewBar
 
-CViewProperties::CViewProperties()
+CViewProperties::CViewProperties() : m_pActObj(NULL)
 {
 }
 
@@ -37,6 +37,7 @@ BEGIN_MESSAGE_MAP(CViewProperties, CDockablePane)
 	ON_WM_SETFOCUS()
 	ON_WM_SETTINGCHANGE()
 	ON_MESSAGE(WM_INITIALUPDATE, OnInitialUpdate)
+	ON_REGISTERED_MESSAGE(AFX_WM_PROPERTY_CHANGED, &CViewProperties::OnPropertyChanged)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -65,12 +66,34 @@ void CViewProperties::AdjustLayout()
 void CViewProperties::OnUpdate(CWnd* pSender, CobjcontainerDoc::OP op, CObject3D* obj)
 {
 	TRACE(_T("CViewProperties::OnUpdate\n"));
+	if (op == CobjcontainerDoc::OP_SEL)
+	{
+		m_pActObj = obj;
+		InitPropList();
+	}
+	else if(op == CobjcontainerDoc::OP_DEL)
+	{
+		if (m_pActObj == obj)
+		{
+			CobjcontainerDoc* pDoc = GetDocument();
+			m_pActObj = pDoc->RootObj();
+		}
+		InitPropList();
+	}
+	else if(op == CobjcontainerDoc::OP_CNN_PARENT
+		|| op == CobjcontainerDoc::OP_CNN_CHILD)
+	{
+		if (m_pActObj == obj)
+			UpdatePropList();
+	}
 }
 
 LRESULT CViewProperties::OnInitialUpdate(WPARAM, LPARAM)
 {
 	CobjcontainerDoc* pDoc = GetDocument();
 	pDoc->RegisterView(this);
+	m_pActObj = pDoc->RootObj();
+	InitPropList();
 	return 0;
 }
 
@@ -102,7 +125,7 @@ int CViewProperties::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		return -1;      // fail to create
 	}
 
-	InitPropList();
+	//InitPropList();
 
 	m_wndToolBar.Create(this, AFX_DEFAULT_TOOLBAR_STYLE, IDR_PROPERTIES);
 	m_wndToolBar.LoadToolBar(IDR_PROPERTIES, 0, 0, TRUE /* Is locked */);
@@ -148,6 +171,7 @@ void CViewProperties::OnUpdateSortProperties(CCmdUI* pCmdUI)
 void CViewProperties::OnProperties1()
 {
 	// TODO: Add your command handler code here
+	TRACE(_T("OnProperties1\n"));
 }
 
 void CViewProperties::OnUpdateProperties1(CCmdUI* /*pCmdUI*/)
@@ -158,6 +182,7 @@ void CViewProperties::OnUpdateProperties1(CCmdUI* /*pCmdUI*/)
 void CViewProperties::OnProperties2()
 {
 	// TODO: Add your command handler code here
+	TRACE(_T("OnProperties2\n"));
 }
 
 void CViewProperties::OnUpdateProperties2(CCmdUI* /*pCmdUI*/)
@@ -165,7 +190,20 @@ void CViewProperties::OnUpdateProperties2(CCmdUI* /*pCmdUI*/)
 	// TODO: Add your command update UI handler code here
 }
 
+void CViewProperties::UpdatePropList()
+{
+	//TODO: Update properties data
+	ASSERT(NULL != m_pActObj);
+	m_wndPropList.Update(m_pActObj);
+}
+
 void CViewProperties::InitPropList()
+{
+	ASSERT(NULL != m_pActObj);
+	m_wndPropList.Init(m_pActObj);
+}
+
+void CViewProperties::InitPropListObsolete()
 {
 	SetPropListFont();
 
@@ -248,6 +286,18 @@ void CViewProperties::InitPropList()
 	m_wndPropList.AddProperty(pGroup4);
 }
 
+
+LRESULT CViewProperties::OnPropertyChanged(WPARAM wp,LPARAM lp)
+{
+	CMFCPropertyGridProperty* modified = (CMFCPropertyGridProperty*)lp;
+	_variant_t var = modified->GetValue();
+	if (var.vt == VT_I4)
+		TRACE("changed by id:%d %d\n", wp, var.intVal);
+	else
+		TRACE("changed by id:%d\n", wp);
+	return 0;
+}
+
 void CViewProperties::OnSetFocus(CWnd* pOldWnd)
 {
 	CDockablePane::OnSetFocus(pOldWnd);
@@ -258,6 +308,7 @@ void CViewProperties::OnSettingChange(UINT uFlags, LPCTSTR lpszSection)
 {
 	CDockablePane::OnSettingChange(uFlags, lpszSection);
 	SetPropListFont();
+	TRACE(_T("OnSettingChange\n"));
 }
 
 void CViewProperties::SetPropListFont()
