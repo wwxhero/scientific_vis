@@ -59,26 +59,32 @@ void CPropertyGridCtrlObject3D::Init(CObject3D* pObj)
 	}
 
 	CString strNameProp;
-	CString strObjName;
-	pObj->GetName(strObjName);
 	for (std::list<CRuntimeClass*>::iterator it = lstHieracky.begin(); it != lstHieracky.end(); it ++)
 	{
 		pRtcObj = *it;
 		CRuntimeClass* pRtcPropG = c_mapObj2Prop[pRtcObj];
 		ATLASSERT(NULL != pRtcPropG);
 		CPropertyGridGroup* pProperty = static_cast<CPropertyGridGroup*>(pRtcPropG->CreateObject());
-		strNameProp.Format(_T("[%s]:%s"), strObjName, CA2T(pRtcObj->m_lpszClassName));
+		strNameProp.Format(_T("%s"), CA2T(pRtcObj->m_lpszClassName));
 		pProperty->SetName(strNameProp);
-		pProperty->Cnn(pObj);
+		pProperty->Init(pObj);
 		AddProperty(pProperty, FALSE, FALSE);
 	}
 	AdjustLayout();
 	Update(pObj);
 }
-void CPropertyGridCtrlObject3D::Update(CObject3D* pObj)
+bool CPropertyGridCtrlObject3D::Update(CObject3D* pObj, bool bObj2Property)
 {
-
+	POSITION pos = m_lstProps.GetHeadPosition();
+	bool updated = true;
+	while(pos && updated)
+	{
+		CPropertyGridGroup* pg = static_cast<CPropertyGridGroup*>(m_lstProps.GetNext(pos));
+		updated = pg->Update(pObj, bObj2Property);
+	}
+	return updated;
 }
+
 
 // CPropertyGridCtrlObject3D message handlers
 

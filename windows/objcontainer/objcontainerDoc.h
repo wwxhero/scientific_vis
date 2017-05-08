@@ -15,7 +15,7 @@ protected: // create from serialization only
 
 // Attributes
 public:
-	enum OP {OP_SEL = 0, OP_NEW, OP_DEL, OP_CNN_PARENT, OP_CNN_CHILD };
+	enum OP {OP_SEL = 0, OP_NEW, OP_DEL, OP_CNN_PARENT, OP_CNN_CHILD, OP_NAMECH };
 // Operations
 public:
 

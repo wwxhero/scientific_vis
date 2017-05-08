@@ -21,13 +21,17 @@ public:
 	{
 		return m_nextSibbling;
 	}
-	virtual void GetName(CString& strName) const
+	void GetName(CString& strName) const
 	{
-		strName = _T("Generic 3D Object");
+		strName = m_strName;
 	}
 	virtual void RemoveSelf();
 
 	static bool Connect(CObject3D* parent, CObject3D* child);
+
+	static bool SetName(CObject3D* pThis, const _variant_t& vName);
+	static bool GetName(const CObject3D* pThis, _variant_t& vName);
+
 private:
 	virtual void Serialize(CArchive& ar);
 
@@ -37,6 +41,8 @@ private:
 	CObject3D* m_parent;
 	CObject3D* m_firstChild;
 	CObject3D* m_nextSibbling;
+protected:
+	CString m_strName;
 };
 
 

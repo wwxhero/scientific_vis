@@ -60,8 +60,9 @@ protected:
 
 	void InitPropList();
 	void InitPropListObsolete();
-	void UpdatePropList();
+	bool UpdatePropList();
 	void SetPropListFont();
+	void UpdateTitle();
 
 
 

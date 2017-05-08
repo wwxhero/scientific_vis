@@ -17,6 +17,7 @@ CObject3D::CObject3D()
 	, m_parent(NULL)
 	, m_firstChild(NULL)
 	, m_nextSibbling(NULL)
+	, m_strName(_T("General 3D Object"))
 {
 #ifdef TEST_SIERALIZATION
 	for (int c = 0; c < 4; c ++)
@@ -37,17 +38,25 @@ CObject3D::~CObject3D()
 void CObject3D::Serialize(CArchive& ar)
 {
 	bool storing = ar.IsStoring();
-	for (int c = 0; c < 4; c ++)
+	// for (int c = 0; c < 4; c ++)
+	// {
+	// 	Vector4& v = m_local2parent[c];
+	// 	for (int r = 0; r < 4; r ++)
+	// 	{
+	// 		Real& e = v[r];
+	// 		if (storing)
+	// 			ar << e;
+	// 		else
+	// 			ar >> e;
+	// 	}
+	// }
+	if (storing)
 	{
-		Vector4& v = m_local2parent[c];
-		for (int r = 0; r < 4; r ++)
-		{
-			Real& e = v[r];
-			if (storing)
-				ar << e;
-			else
-				ar >> e;
-		}
+		ar << m_strName;
+	}
+	else
+	{
+		ar >> m_strName;
 	}
 	CTreeNodePersist::Serialize(ar);
 }
@@ -148,6 +157,18 @@ bool CObject3D::Connect(CObject3D* parent, CObject3D* child)
 		parent->AddChild(child);
 	}
 	return !cycle;
+}
+
+
+bool CObject3D::SetName(CObject3D* pThis, const _variant_t& vName)
+{
+	pThis->m_strName = vName;
+	return true;
+}
+bool CObject3D::GetName(const CObject3D* pThis, _variant_t& vName)
+{
+	vName = pThis->m_strName;
+	return true;
 }
 
 // CObject3D member functions

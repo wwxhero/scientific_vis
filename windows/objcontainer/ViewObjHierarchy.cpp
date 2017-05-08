@@ -124,7 +124,47 @@ void CViewObjHierarchy::OnUpdate(CWnd* pSender, CobjcontainerDoc::OP op, CObject
 	else
 	{
 		//todo: a tree traverse algorithm for the op
+		if (CobjcontainerDoc::OP_NAMECH == op)
+		{
+			HTREEITEM hItem = FindItem(pObj);
+			ASSERT(NULL != hItem);
+			CString strName;
+			pObj->GetName(strName);
+			m_wndObjsTreeView.SetItemText(hItem, strName);
+		}
 	}
+}
+
+HTREEITEM CViewObjHierarchy::FindItem(CObject3D* pObj)
+{
+	HTREEITEM hRoot = m_wndObjsTreeView.GetRootItem();
+	std::queue<HTREEITEM> tq;
+	tq.push(hRoot);
+	HTREEITEM hFind = NULL;
+	while(!tq.empty()
+		&& NULL == hFind)
+	{
+		HTREEITEM hNode = tq.front();
+		tq.pop();
+		TVITEM item;
+		item.mask = TVIF_PARAM;
+		item.hItem = hNode;
+		m_wndObjsTreeView.GetItem(&item);
+		CObject3D* pItem = (CObject3D *)(item.lParam);
+		if (pItem == pObj)
+			hFind = hNode;
+		if (NULL == hFind)
+		{
+			HTREEITEM hChild = m_wndObjsTreeView.GetChildItem(hNode);
+			while (NULL != hChild)
+			{
+				tq.push(hChild);
+				hChild = m_wndObjsTreeView.GetNextSiblingItem(hChild);
+			}
+		}
+	}
+	return hFind;
+
 }
 
 

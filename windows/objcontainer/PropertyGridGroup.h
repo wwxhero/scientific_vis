@@ -8,6 +8,7 @@ public:
 	DECLARE_DYNCREATE(CPropertyGridGroup)
 	CPropertyGridGroup(void);
 	virtual ~CPropertyGridGroup(void);
-	virtual void Cnn(const CObject3D* pObj);
+	virtual void Init(const CObject3D* pObj);
+	bool Update(CObject3D* pObj, bool bObj2Prop);
 };
 
