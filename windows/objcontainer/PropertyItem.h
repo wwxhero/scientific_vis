@@ -11,6 +11,7 @@ typedef struct _Pipe
 class CPropertyItem :
 	public CMFCPropertyGridProperty
 {
+	DECLARE_DYNAMIC(CPropertyItem)
 public:
 	CPropertyItem(const CString& strName, const _variant_t& v,  Pipe pipe, LPCTSTR lpszDescr = NULL);
 	virtual ~CPropertyItem(void);

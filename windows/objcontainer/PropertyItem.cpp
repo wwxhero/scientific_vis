@@ -1,6 +1,7 @@
 #include "StdAfx.h"
 #include "PropertyItem.h"
 
+IMPLEMENT_DYNAMIC(CPropertyItem, CMFCPropertyGridProperty)
 
 CPropertyItem::CPropertyItem(const CString& strName, const _variant_t& v, Pipe pipe, LPCTSTR lpszDescr)
 	: CMFCPropertyGridProperty(strName, v, lpszDescr)

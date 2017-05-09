@@ -61,6 +61,7 @@
 typedef float Real;
 typedef glm::tmat4x4<Real> Matrix4x4;
 typedef glm::tvec4<Real> Vector4;
+typedef glm::tvec3<Real> Vector3;
 
 //#define TEST_CNN
 

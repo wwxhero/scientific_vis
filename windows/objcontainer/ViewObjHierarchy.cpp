@@ -124,7 +124,7 @@ void CViewObjHierarchy::OnUpdate(CWnd* pSender, CobjcontainerDoc::OP op, CObject
 	else
 	{
 		//todo: a tree traverse algorithm for the op
-		if (CobjcontainerDoc::OP_NAMECH == op)
+		if (CobjcontainerDoc::OP_PROPCH == op)
 		{
 			HTREEITEM hItem = FindItem(pObj);
 			ASSERT(NULL != hItem);

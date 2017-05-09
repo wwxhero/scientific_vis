@@ -31,6 +31,24 @@ public:
 
 	static bool SetName(CObject3D* pThis, const _variant_t& vName);
 	static bool GetName(const CObject3D* pThis, _variant_t& vName);
+	static bool SetPosX(CObject3D* pThis, const _variant_t& posX);
+	static bool GetPosX(const CObject3D* pThis, _variant_t& posX);
+	static bool SetPosY(CObject3D* pThis, const _variant_t& posY);
+	static bool GetPosY(const CObject3D* pThis, _variant_t& posY);
+	static bool SetPosZ(CObject3D* pThis, const _variant_t& posZ);
+	static bool GetPosZ(const CObject3D* pThis, _variant_t& posZ);
+	static bool SetRotX(CObject3D* pThis, const _variant_t& rotX);
+	static bool GetRotX(const CObject3D* pThis, _variant_t& rotX);
+	static bool SetRotY(CObject3D* pThis, const _variant_t& rotY);
+	static bool GetRotY(const CObject3D* pThis, _variant_t& rotY);
+	static bool SetRotZ(CObject3D* pThis, const _variant_t& rotZ);
+	static bool GetRotZ(const CObject3D* pThis, _variant_t& rotZ);
+	static bool SetScaleX(CObject3D* pThis, const _variant_t& scaleX);
+	static bool GetScaleX(const CObject3D* pThis, _variant_t& scaleX);
+	static bool SetScaleY(CObject3D* pThis, const _variant_t& scaleY);
+	static bool GetScaleY(const CObject3D* pThis, _variant_t& scaleY);
+	static bool SetScaleZ(CObject3D* pThis, const _variant_t& scaleZ);
+	static bool GetScaleZ(const CObject3D* pThis, _variant_t& scaleZ);
 
 private:
 	virtual void Serialize(CArchive& ar);
@@ -43,6 +61,9 @@ private:
 	CObject3D* m_nextSibbling;
 protected:
 	CString m_strName;
+	Vector3 m_pos;
+	Vector3 m_rot; //in angle
+	Vector3 m_scale;
 };
 
 

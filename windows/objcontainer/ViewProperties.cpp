@@ -308,9 +308,8 @@ LRESULT CViewProperties::OnPropertyChanged(WPARAM wp,LPARAM lp)
 	ATLASSERT(modified->IsKindOf(RUNTIME_CLASS(CPropertyItem)));
 	(static_cast<CPropertyItem*>(modified))->Update(m_pActObj, false);
 	CobjcontainerDoc* pDoc = GetDocument();
-	pDoc->UpdateAllViews(this, CobjcontainerDoc::OP_NAMECH, m_pActObj);
+	pDoc->UpdateAllViews(this, CobjcontainerDoc::OP_PROPCH, m_pActObj);
 	UpdateTitle();
-
 	return 0;
 }
 
