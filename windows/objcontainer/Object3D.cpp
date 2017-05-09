@@ -17,6 +17,10 @@ CObject3D::CObject3D()
 	, m_parent(NULL)
 	, m_firstChild(NULL)
 	, m_nextSibbling(NULL)
+	, m_strName(_T("General 3D Object"))
+	, m_pos(0)
+	, m_rot(0)
+	, m_scale(1)
 {
 #ifdef TEST_SIERALIZATION
 	for (int c = 0; c < 4; c ++)
@@ -36,17 +40,36 @@ CObject3D::~CObject3D()
 
 void CObject3D::Serialize(CArchive& ar)
 {
-	bool storing = ar.IsStoring();
-	for (int c = 0; c < 4; c ++)
+	BOOL storing = ar.IsStoring();
+	// for (int c = 0; c < 4; c ++)
+	// {
+	// 	Vector4& v = m_local2parent[c];
+	// 	for (int r = 0; r < 4; r ++)
+	// 	{
+	// 		Real& e = v[r];
+	// 		if (storing)
+	// 			ar << e;
+	// 		else
+	// 			ar >> e;
+	// 	}
+	// }
+	Vector3* v3s[] = {&m_pos, &m_rot, &m_scale};
+	if (storing)
 	{
-		Vector4& v = m_local2parent[c];
-		for (int r = 0; r < 4; r ++)
+		ar << m_strName;
+		for (int i = 0; i < sizeof(v3s)/sizeof(Vector3*); i ++)
 		{
-			Real& e = v[r];
-			if (storing)
-				ar << e;
-			else
-				ar >> e;
+			for (int j = 0; j < 3; j ++)
+				ar << (*v3s[i])[j];
+		}
+	}
+	else
+	{
+		ar >> m_strName;
+		for (int i = 0; i < sizeof(v3s)/sizeof(Vector3*); i ++)
+		{
+			for (int j = 0; j < 3; j ++)
+				ar >> (*v3s[i])[j];
 		}
 	}
 	CTreeNodePersist::Serialize(ar);
@@ -148,6 +171,109 @@ bool CObject3D::Connect(CObject3D* parent, CObject3D* child)
 		parent->AddChild(child);
 	}
 	return !cycle;
+}
+
+
+bool CObject3D::SetName(CObject3D* pThis, const _variant_t& vName)
+{
+	pThis->m_strName = vName;
+	return true;
+}
+bool CObject3D::GetName(const CObject3D* pThis, _variant_t& vName)
+{
+	vName = pThis->m_strName;
+	return true;
+}
+
+bool CObject3D::SetPosX(CObject3D* pThis, const _variant_t& posX)
+{
+	pThis->m_pos.x = posX;
+	return true;
+}
+bool CObject3D::GetPosX(const CObject3D* pThis, _variant_t& posX)
+{
+	posX = (int)pThis->m_pos.x;
+	return true;
+}
+bool CObject3D::SetPosY(CObject3D* pThis, const _variant_t& posY)
+{
+	pThis->m_pos.y = posY;
+	return true;
+}
+bool CObject3D::GetPosY(const CObject3D* pThis, _variant_t& posY)
+{
+	posY = (int)pThis->m_pos.y;
+	return true;
+}
+bool CObject3D::SetPosZ(CObject3D* pThis, const _variant_t& posZ)
+{
+	pThis->m_pos.z = posZ;
+	return true;
+}
+bool CObject3D::GetPosZ(const CObject3D* pThis, _variant_t& posZ)
+{
+	posZ = (int)pThis->m_pos.z;
+	return true;
+}
+bool CObject3D::SetRotX(CObject3D* pThis, const _variant_t& rotX)
+{
+	pThis->m_rot.x = rotX;
+	return true;
+}
+bool CObject3D::GetRotX(const CObject3D* pThis, _variant_t& rotX)
+{
+	rotX = (int)pThis->m_rot.x;
+	return true;
+}
+bool CObject3D::SetRotY(CObject3D* pThis, const _variant_t& rotY)
+{
+	pThis->m_rot.y = rotY;
+	return true;
+}
+bool CObject3D::GetRotY(const CObject3D* pThis, _variant_t& rotY)
+{
+	rotY = (int)pThis->m_rot.y;
+	return true;
+}
+bool CObject3D::SetRotZ(CObject3D* pThis, const _variant_t& rotZ)
+{
+	pThis->m_rot.z = rotZ;
+	return true;
+}
+bool CObject3D::GetRotZ(const CObject3D* pThis, _variant_t& rotZ)
+{
+	rotZ = (int)pThis->m_rot.z;
+	return true;
+}
+bool CObject3D::SetScaleX(CObject3D* pThis, const _variant_t& scaleX)
+{
+	pThis->m_scale.x = scaleX;
+	return true;
+}
+bool CObject3D::GetScaleX(const CObject3D* pThis, _variant_t& scaleX)
+{
+	scaleX = (int)pThis->m_scale.x;
+	return true;
+}
+bool CObject3D::SetScaleY(CObject3D* pThis, const _variant_t& scaleY)
+{
+	pThis->m_scale.y = scaleY;
+	return true;
+}
+bool CObject3D::GetScaleY(const CObject3D* pThis, _variant_t& scaleY)
+{
+	scaleY = (int)pThis->m_scale.y;
+	return true;
+}
+bool CObject3D::SetScaleZ(CObject3D* pThis, const _variant_t& scaleZ)
+{
+	pThis->m_scale.z = scaleZ;
+	return true;
+}
+bool CObject3D::GetScaleZ(const CObject3D* pThis, _variant_t& scaleZ)
+{
+	scaleZ = (int)pThis->m_scale.z;
+	return true;
 }
 
 // CObject3D member functions

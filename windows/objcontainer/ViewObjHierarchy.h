@@ -62,6 +62,7 @@ private:
 
 	void GetSelectedItem(Item& item);
 	void Reload(Item& item, bool expand = true);
+	HTREEITEM FindItem(CObject3D* pObj);
 
 protected:
 	CClassToolBar m_wndToolBar;

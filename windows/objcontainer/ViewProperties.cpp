@@ -5,6 +5,7 @@
 #include "Resource.h"
 #include "MainFrm.h"
 #include "objcontainer.h"
+#include "PropertyItem.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -65,7 +66,8 @@ void CViewProperties::AdjustLayout()
 
 void CViewProperties::OnUpdate(CWnd* pSender, CobjcontainerDoc::OP op, CObject3D* obj)
 {
-	TRACE(_T("CViewProperties::OnUpdate\n"));
+	if (pSender == this)
+		return;
 	if (op == CobjcontainerDoc::OP_SEL)
 	{
 		m_pActObj = obj;
@@ -190,17 +192,30 @@ void CViewProperties::OnUpdateProperties2(CCmdUI* /*pCmdUI*/)
 	// TODO: Add your command update UI handler code here
 }
 
-void CViewProperties::UpdatePropList()
+bool CViewProperties::UpdatePropList()
 {
 	//TODO: Update properties data
 	ASSERT(NULL != m_pActObj);
-	m_wndPropList.Update(m_pActObj);
+	return m_wndPropList.Update(m_pActObj);
 }
 
 void CViewProperties::InitPropList()
 {
+	SetPropListFont();
 	ASSERT(NULL != m_pActObj);
 	m_wndPropList.Init(m_pActObj);
+	UpdateTitle();
+}
+
+void CViewProperties::UpdateTitle()
+{
+	CString strTitle;
+	strTitle.LoadString(IDS_PROPERTIES_WND);
+	CString subTitle;
+	m_pActObj->GetName(subTitle);
+	CString strNTitle;
+	strNTitle.Format(_T("%s-%s"), strTitle, subTitle);
+	SetWindowText(strNTitle);
 }
 
 void CViewProperties::InitPropListObsolete()
@@ -290,11 +305,11 @@ void CViewProperties::InitPropListObsolete()
 LRESULT CViewProperties::OnPropertyChanged(WPARAM wp,LPARAM lp)
 {
 	CMFCPropertyGridProperty* modified = (CMFCPropertyGridProperty*)lp;
-	_variant_t var = modified->GetValue();
-	if (var.vt == VT_I4)
-		TRACE("changed by id:%d %d\n", wp, var.intVal);
-	else
-		TRACE("changed by id:%d\n", wp);
+	ATLASSERT(modified->IsKindOf(RUNTIME_CLASS(CPropertyItem)));
+	(static_cast<CPropertyItem*>(modified))->Update(m_pActObj, false);
+	CobjcontainerDoc* pDoc = GetDocument();
+	pDoc->UpdateAllViews(this, CobjcontainerDoc::OP_PROPCH, m_pActObj);
+	UpdateTitle();
 	return 0;
 }
 

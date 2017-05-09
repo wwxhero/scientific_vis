@@ -7,9 +7,6 @@ public:
 	DECLARE_SERIAL( CBox )
 	CBox(void);
 	virtual ~CBox(void);
-	virtual void GetName(CString& strName) const
-	{
-		strName = _T("Box");
-	}
+
 };
 

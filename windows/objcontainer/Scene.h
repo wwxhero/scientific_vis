@@ -7,10 +7,6 @@ public:
 	DECLARE_SERIAL( CScene )
 	CScene(void);
 	virtual ~CScene(void);
-	virtual void GetName(CString& strName) const
-	{
-		strName = _T("Scene");
-	}
 
 
 	virtual void RemoveSelf()
