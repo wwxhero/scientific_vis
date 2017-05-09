@@ -20,7 +20,8 @@ struct _IInitializer : public _Initializer
 	LPCTSTR name;
 	LPCTSTR descr;
 	Pipe pipe;
-	_IInitializer(int a_firstChild, int a_nextSibbling, LPCTSTR a_name, LPCTSTR a_descr, Set set, Get get)
+	BOOL bSpinable;
+	_IInitializer(int a_firstChild, int a_nextSibbling, LPCTSTR a_name, LPCTSTR a_descr, Set set, Get get, BOOL a_Spinable = FALSE)
 	{
 		pt = Item;
 		idxFirstChild = a_firstChild;
@@ -30,6 +31,7 @@ struct _IInitializer : public _Initializer
 		pipe.set = set;
 		pipe.get = get;
 		propPane = NULL;
+		bSpinable = a_Spinable;
 	}
 };
 

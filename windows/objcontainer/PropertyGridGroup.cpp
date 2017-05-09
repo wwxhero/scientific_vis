@@ -3,6 +3,8 @@
 #include <queue>
 #include "PropertyGridGroup.h"
 #include "PropertyItem.h"
+#define SPIN_MIN -100
+#define SPIN_MAX +100
 
 IMPLEMENT_DYNCREATE(CPropertyGridGroup, CMFCPropertyGridProperty)
 CPropertyGridGroup::CPropertyGridGroup(void)
@@ -46,9 +48,8 @@ void CPropertyGridGroup::Initiate(const CObject3D* pObj, _Initializer** params)
 	std::queue<_Initializer*> tq;
 	_Initializer* c = params[0];
 
-	while(NULL != c)
+	do
 	{
-
 		if (Group == c->pt)
 		{
 			_GInitializer* g = (_GInitializer*)c;
@@ -60,12 +61,14 @@ void CPropertyGridGroup::Initiate(const CObject3D* pObj, _Initializer** params)
 			_variant_t v;
 			i->pipe.get(pObj, v);
 			c->propPane = new CPropertyItem(i->name, v, i->pipe, i->descr);
+			if (i->bSpinable)
+				c->propPane->EnableSpinControl(TRUE, SPIN_MIN, SPIN_MAX);
 		}
 		AddSubItem(c->propPane);
 
 		tq.push(c);
 		c = (c_idxNULL == c->idxNextSibbling) ? NULL : params[c->idxNextSibbling];
-	}
+	}while(NULL != c);
 
 	while(!tq.empty())
 	{
@@ -86,6 +89,8 @@ void CPropertyGridGroup::Initiate(const CObject3D* pObj, _Initializer** params)
 				_variant_t v;
 				i->pipe.get(pObj, v);
 				c->propPane = new CPropertyItem(i->name, v, i->pipe, i->descr);
+				if (i->bSpinable)
+					c->propPane->EnableSpinControl(TRUE, SPIN_MIN, SPIN_MAX);
 			}
 			n->propPane->AddSubItem(c->propPane);
 

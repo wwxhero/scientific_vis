@@ -192,7 +192,7 @@ bool CObject3D::SetPosX(CObject3D* pThis, const _variant_t& posX)
 }
 bool CObject3D::GetPosX(const CObject3D* pThis, _variant_t& posX)
 {
-	posX = pThis->m_pos.x;
+	posX = (int)pThis->m_pos.x;
 	return true;
 }
 bool CObject3D::SetPosY(CObject3D* pThis, const _variant_t& posY)
@@ -202,7 +202,7 @@ bool CObject3D::SetPosY(CObject3D* pThis, const _variant_t& posY)
 }
 bool CObject3D::GetPosY(const CObject3D* pThis, _variant_t& posY)
 {
-	posY = pThis->m_pos.y;
+	posY = (int)pThis->m_pos.y;
 	return true;
 }
 bool CObject3D::SetPosZ(CObject3D* pThis, const _variant_t& posZ)
@@ -212,7 +212,7 @@ bool CObject3D::SetPosZ(CObject3D* pThis, const _variant_t& posZ)
 }
 bool CObject3D::GetPosZ(const CObject3D* pThis, _variant_t& posZ)
 {
-	posZ = pThis->m_pos.z;
+	posZ = (int)pThis->m_pos.z;
 	return true;
 }
 bool CObject3D::SetRotX(CObject3D* pThis, const _variant_t& rotX)
@@ -222,7 +222,7 @@ bool CObject3D::SetRotX(CObject3D* pThis, const _variant_t& rotX)
 }
 bool CObject3D::GetRotX(const CObject3D* pThis, _variant_t& rotX)
 {
-	rotX = pThis->m_rot.x;
+	rotX = (int)pThis->m_rot.x;
 	return true;
 }
 bool CObject3D::SetRotY(CObject3D* pThis, const _variant_t& rotY)
@@ -232,7 +232,7 @@ bool CObject3D::SetRotY(CObject3D* pThis, const _variant_t& rotY)
 }
 bool CObject3D::GetRotY(const CObject3D* pThis, _variant_t& rotY)
 {
-	rotY = pThis->m_rot.y;
+	rotY = (int)pThis->m_rot.y;
 	return true;
 }
 bool CObject3D::SetRotZ(CObject3D* pThis, const _variant_t& rotZ)
@@ -242,7 +242,7 @@ bool CObject3D::SetRotZ(CObject3D* pThis, const _variant_t& rotZ)
 }
 bool CObject3D::GetRotZ(const CObject3D* pThis, _variant_t& rotZ)
 {
-	rotZ = pThis->m_rot.z;
+	rotZ = (int)pThis->m_rot.z;
 	return true;
 }
 bool CObject3D::SetScaleX(CObject3D* pThis, const _variant_t& scaleX)
@@ -252,7 +252,7 @@ bool CObject3D::SetScaleX(CObject3D* pThis, const _variant_t& scaleX)
 }
 bool CObject3D::GetScaleX(const CObject3D* pThis, _variant_t& scaleX)
 {
-	scaleX = pThis->m_scale.x;
+	scaleX = (int)pThis->m_scale.x;
 	return true;
 }
 bool CObject3D::SetScaleY(CObject3D* pThis, const _variant_t& scaleY)
@@ -262,7 +262,7 @@ bool CObject3D::SetScaleY(CObject3D* pThis, const _variant_t& scaleY)
 }
 bool CObject3D::GetScaleY(const CObject3D* pThis, _variant_t& scaleY)
 {
-	scaleY = pThis->m_scale.y;
+	scaleY = (int)pThis->m_scale.y;
 	return true;
 }
 bool CObject3D::SetScaleZ(CObject3D* pThis, const _variant_t& scaleZ)
@@ -272,7 +272,7 @@ bool CObject3D::SetScaleZ(CObject3D* pThis, const _variant_t& scaleZ)
 }
 bool CObject3D::GetScaleZ(const CObject3D* pThis, _variant_t& scaleZ)
 {
-	scaleZ = pThis->m_scale.z;
+	scaleZ = (int)pThis->m_scale.z;
 	return true;
 }
 
