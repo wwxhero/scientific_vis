@@ -315,6 +315,7 @@ OBJVIS_API_FUNC(GLvoid, glmWeld)(GLMmodel* model, GLfloat epsilon);
 OBJVIS_API_FUNC(GLubyte*, glmReadPPM)(char* filename, int* width, int* height);
 
 
+OBJVIS_API_FUNC(GLvoid, glmUnloadVBO)(GLMmodel* model);
 OBJVIS_API_FUNC(GLvoid, glmLoadInVBO)(GLMmodel* model);
 OBJVIS_API_FUNC(GLvoid, glmDrawVBO)(GLMmodel* model, GLuint program);
 

@@ -34,9 +34,12 @@ public:
 		model2world = glm::mat4(1.0f);
 	}
 
+
 	virtual void RemoveSelf();
 
 	virtual void glDraw(const Matrix4x4& w2v, const Matrix4x4& v2c);
+	virtual void glUpdate();
+	virtual void glDestroy();
 
 	static bool Connect(CObject3D* parent, CObject3D* child);
 

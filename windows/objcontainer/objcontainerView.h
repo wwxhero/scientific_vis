@@ -26,6 +26,7 @@ public:
 	virtual void OnDraw(CDC* pDC);  // overridden to draw this m_view
 	virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
 	virtual void OnUpdate(CView* pSender, LPARAM lHint, CObject* pHint);
+	virtual void OnInitialUpdate(); // called first time after construct
 
 protected:
 	virtual BOOL OnPreparePrinting(CPrintInfo* pInfo);
@@ -44,8 +45,9 @@ public:
 protected:
 	virtual int OnGLCreate();
 	virtual void OnGLDraw();
-	virtual void OnUpdateGLData();
+	virtual void OnUpdateGLData(CObject3D* pObj);
 	virtual void OnGLSize(int cx, int cy);
+	virtual void OnGLDestroy(CObject3D* pObj = NULL);
 
 private:
 	void DrawScene(CScene* pScene);
@@ -53,8 +55,6 @@ private:
 // Generated message map functions
 protected:
 	afx_msg void OnFilePrintPreview();
-	afx_msg void OnLeftTurn();
-	afx_msg void OnRightTurn();
 	afx_msg void OnSnapShot();
 	afx_msg void OnRButtonUp(UINT nFlags, CPoint point);
 	afx_msg void OnContextMenu(CWnd* pWnd, CPoint point);
@@ -63,21 +63,6 @@ protected:
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 
 	DECLARE_MESSAGE_MAP()
-
-private:
-	GLMmodel* m_objModel;
-	GLuint m_programID;
-
-	GLuint m_modelID;
-	GLuint m_viewID;
-	GLuint m_projectionID;
-
-	glm::mat4 m_model;
-	glm::mat4 m_view;
-	glm::mat4 m_projection;
-
-	float m_degRotY;
-
 };
 
 #ifndef _DEBUG  // debug version in objcontainerView.cpp

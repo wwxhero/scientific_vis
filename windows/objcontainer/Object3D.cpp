@@ -70,6 +70,16 @@ void CObject3D::glDraw(const Matrix4x4& w2v, const Matrix4x4& v2c)
 
 }
 
+void CObject3D::glDestroy()
+{
+
+}
+
+void CObject3D::glUpdate()
+{
+
+}
+
 void CObject3D::DumpData()
 {
 	Vector4 v0 = m_local2parent[0];

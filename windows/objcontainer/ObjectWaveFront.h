@@ -32,7 +32,9 @@ public:
 	DECLARE_SERIAL( CObjectWaveFront )
 	CObjectWaveFront(void);
 	virtual ~CObjectWaveFront(void);
-	void glDraw(const Matrix4x4& w2v, const Matrix4x4& v2c);
+	virtual void glDraw(const Matrix4x4& w2v, const Matrix4x4& v2c);
+	virtual void glUpdate();
+	virtual void glDestroy();
 private:
 	GLMmodel* m_objModel;
 private:

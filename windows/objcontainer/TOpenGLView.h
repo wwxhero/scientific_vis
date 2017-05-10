@@ -19,8 +19,9 @@ protected:
 private:
 	virtual int OnGLCreate() = 0;
 	virtual void OnGLDraw() = 0;
-	virtual void OnUpdateGLData() = 0;
+	virtual void OnUpdateGLData(CObject3D* pObj) = 0;
 	virtual void OnGLSize(int cx, int cy) = 0;
+	virtual void OnGLDestroy(CObject3D* pObj = NULL) = 0;
 protected:
 	int OnCreate(LPCREATESTRUCT lpCreateStruct)
 	{
@@ -95,6 +96,11 @@ protected:
 	}
 	void OnDestroy()
 	{
+		TThis *pThis = static_cast<TThis*>(this);
+		CDC *pDC = pThis->GetDC();
+		wglMakeCurrent(pDC->m_hDC, m_hrc);
+		OnGLDestroy();
+		pThis->ReleaseDC(pDC);
 		wglMakeCurrent(NULL, NULL);
 		if (m_hrc)
 		{
@@ -102,6 +108,19 @@ protected:
 			m_hrc = NULL;
 		}
 	}
+
+	void DestroyGLData(CObject3D* pObj)
+	{
+		TThis *pThis = static_cast<TThis*>(this);
+		CDC *pDC = pThis->GetDC();
+		wglMakeCurrent(pDC->m_hDC, m_hrc);
+		OnGLDestroy(pObj);
+
+		wglMakeCurrent(NULL, NULL);
+		pThis->ReleaseDC(pDC);
+
+	}
+
 	void OnDraw(CDC *pDC)
 	{
 		if (NULL != m_hrc)
@@ -123,13 +142,13 @@ protected:
 		}
 	}
 
-	void UpdateGLData()
+	void UpdateGLData(CObject3D* pObj)
 	{
 		TThis* pThis = static_cast<TThis *>(this);
 		CDC *pDC = pThis->GetDC();
 		HDC hDC = pDC->m_hDC;
 		wglMakeCurrent(hDC, m_hrc);
-		OnUpdateGLData();
+		OnUpdateGLData(pObj);
 		wglMakeCurrent(NULL, NULL);
 		pThis->ReleaseDC(pDC);
 	}

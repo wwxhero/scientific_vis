@@ -232,8 +232,11 @@ GLMgroup*
 		group->numtriangles = 0;
 		group->triangles = NULL;
 		group->next = model->groups;
+		group->vertexBuffer = GL_INVALID_VALUE;
+		group->normalBuffer = GL_INVALID_VALUE;
 		model->groups = group;
 		model->numgroups++;
+
 	}
 
 	return group;
@@ -1382,6 +1385,7 @@ GLMmodel*
 	model->position[0]   = 0.0;
 	model->position[1]   = 0.0;
 	model->position[2]   = 0.0;
+	model->vao = GL_INVALID_VALUE;
 
 	/* make a first pass through the file to get a count of the number
 	of vertices, normals, texcoords & triangles */
@@ -1960,6 +1964,26 @@ for (i = 1; i <= model->numvertices; i++) {
 
 #endif
 
+GLvoid glmUnloadVBO(GLMmodel* model)
+{
+	if(GL_INVALID_VALUE != model->vao )
+		glDeleteVertexArrays(1, &model->vao);
+	model->vao = GL_INVALID_VALUE;
+	GLMgroup* group;
+	group = model->groups;
+	while (group)
+	{
+		if (GL_INVALID_VALUE != group->vertexBuffer)
+			glDeleteBuffers(1, &group->vertexBuffer);
+		group->vertexBuffer = GL_INVALID_VALUE;
+
+		if (GL_INVALID_VALUE != group->normalBuffer)
+			glDeleteBuffers(1, &group->normalBuffer);
+		group->normalBuffer = GL_INVALID_VALUE;
+
+		group = group->next;
+	}
+}
 
 
 GLvoid glmLoadInVBO(GLMmodel* model)

@@ -24,6 +24,11 @@ public:
 		return m_view2clip;
 	}
 
+	void OnGLSize(int cx, int cy)
+	{
+		m_view2clip = glm::perspective(45.0f, float(cx)/float(cy), 0.1f, 100.0f);
+	}
+
 private:
 	Matrix4x4 m_world2view;
 	Matrix4x4 m_view2clip;

@@ -46,7 +46,12 @@ CObjectWaveFront::CObjectWaveFront(void) : m_objModel(NULL)
 {
 	m_strName = _T("Wavefront");
 
-	m_objModel = glmReadOBJ("E:\\Users\\wanxwang\\scientific_vis\\course_project\\objview\\data\\al.obj");
+	LPCTSTR pathPool[] = {
+		"E:\\Users\\wanxwang\\scientific_vis\\course_project\\objview\\data\\al.obj"
+		, "E:\\Users\\wanxwang\\scientific_vis\\course_project\\objview\\data\\car.obj"
+	};
+	static int r = 0;
+	m_objModel = glmReadOBJ((char*)pathPool[r++%(sizeof(pathPool)/sizeof(LPCTSTR))]);
 	// Normilize vertices
 	glmUnitize(m_objModel);
 	// Compute facet normals
@@ -66,10 +71,21 @@ CObjectWaveFront::~CObjectWaveFront(void)
 	}
 }
 
-void CObjectWaveFront::glDraw(const Matrix4x4& w2v, const Matrix4x4& v2c)
+void CObjectWaveFront::glUpdate()
 {
 	// Load the m_model (vertices and normals) into a vertex buffer
+	glmUnloadVBO(m_objModel);
 	glmLoadInVBO(m_objModel);
+}
+
+void CObjectWaveFront::glDestroy()
+{
+	glmUnloadVBO(m_objModel);
+}
+
+void CObjectWaveFront::glDraw(const Matrix4x4& w2v, const Matrix4x4& v2c)
+{
+
 
 	GLuint programID = (0 == m_programID ? CObjectWaveFront::s_programID : m_programID);
 	ASSERT(0 != programID);

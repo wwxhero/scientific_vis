@@ -26,8 +26,6 @@ BEGIN_MESSAGE_MAP(CobjcontainerView, CView)
 	ON_COMMAND(ID_FILE_PRINT, &CView::OnFilePrint)
 	ON_COMMAND(ID_FILE_PRINT_DIRECT, &CView::OnFilePrint)
 	ON_COMMAND(ID_FILE_PRINT_PREVIEW, &CobjcontainerView::OnFilePrintPreview)
-	ON_COMMAND(ID_BTNLEFT, &CobjcontainerView::OnLeftTurn)
-	ON_COMMAND(ID_BTNRIGHT, &CobjcontainerView::OnRightTurn)
 	ON_COMMAND(ID_EDIT_SNAPSHOT, &CobjcontainerView::OnSnapShot)
 	ON_WM_CONTEXTMENU()
 	ON_WM_RBUTTONUP()
@@ -39,10 +37,8 @@ END_MESSAGE_MAP()
 
 // CobjcontainerView construction/destruction
 
-CobjcontainerView::CobjcontainerView() : m_objModel(NULL)
-									   , m_degRotY(0)
+CobjcontainerView::CobjcontainerView()
 {
-	// TODO: add construction code here
 
 }
 
@@ -76,6 +72,14 @@ void DumpMatrix3x3(const glm::mat3& m)
 	}
 }
 
+void CobjcontainerView::OnInitialUpdate()
+{
+	CView::OnInitialUpdate();
+	CRect rc;
+	GetClientRect(&rc);
+	OnGLSize(rc.Width(), rc.Height());
+}
+
 void CobjcontainerView::DrawScene(CScene* pScene)
 {
 	CCamera* pCamera = pScene->GetCamera();
@@ -89,8 +93,8 @@ void CobjcontainerView::DrawScene(CScene* pScene)
 		CObject3D* n = tq.front();
 		tq.pop();
 
-		//n->glDraw(world2view, view2clip);// this causes the shader program to switch frequently, performance therefore sacrifies.
-		n->glDraw(m_view, m_projection);
+		n->glDraw(world2view, view2clip);// this causes the shader program to switch frequently, performance therefore sacrifies.
+		//n->glDraw(m_view, m_projection);
 
 		CObject3D* c = n->GetFirstChild();
 		while(NULL != c)
@@ -113,55 +117,57 @@ void CobjcontainerView::OnGLDraw()
 	}
 }
 
+void CobjcontainerView::OnGLDestroy(CObject3D* pObj)
+{
+	CObject3D* root = (NULL == pObj ? GetDocument()->RootObj() : pObj);
+	std::queue<CObject3D*> tq;
+	tq.push(root);
+	while(!tq.empty())
+	{
+		CObject3D* n = tq.front();
+		tq.pop();
+
+		n->glDestroy();
+		//n->glDraw(m_view, m_projection);
+
+		CObject3D* c = n->GetFirstChild();
+		while(NULL != c)
+		{
+			tq.push(c);
+			c = c->GetNextSibbling();
+		}
+	}
+}
+
 void CobjcontainerView::OnDraw(CDC* pDC)
 {
 	TOpenGLView::OnDraw(pDC);
 }
 
-void CobjcontainerView::OnUpdateGLData()
+void CobjcontainerView::OnUpdateGLData(CObject3D* pObj)
 {
-	TRACE(_T("OnUpdateGLData\n"));
-	if (NULL != m_objModel)
-	{
-		glmDelete(m_objModel);
-		m_objModel = NULL;
-	}
-	CobjcontainerDoc *pDoc = GetDocument();
-	LPCTSTR filePath = pDoc->GetPathName();
-	static LPCTSTR s_filePath = NULL;
-	if (filePath != s_filePath
-		&& *filePath != _T('\0'))
-	{
-		m_objModel = glmReadOBJ(const_cast<char*>(filePath));
-		// Normilize vertices
-		glmUnitize(m_objModel);
-		// Compute facet normals
-		glmFacetNormals(m_objModel);
-		// Comput vertex normals
-		glmVertexNormals(m_objModel, 90.0);
-		// Load the m_model (vertices and normals) into a vertex buffer
-		glmLoadInVBO(m_objModel);
-		m_degRotY = 0;
-		s_filePath = filePath;
-	}
+	pObj->glUpdate();
 }
-
-
 
 void CobjcontainerView::OnDestroy()
 {
 	CView::OnDestroy();
 	TOpenGLView::OnDestroy();
-	if (m_objModel)
-	{
-		glmDelete(m_objModel);
-		m_objModel = NULL;
-	}
 }
+
 void CobjcontainerView::OnUpdate(CView* pSender, LPARAM lHint, CObject* pHint)
 {
 	CView::OnUpdate(pSender, lHint, pHint);
-	//UpdateGLData();
+	if (NULL != pHint
+		&& (pHint->IsKindOf(RUNTIME_CLASS(CObject3D))))
+	{
+		if (CobjcontainerDoc::OP_NEW == lHint)
+			UpdateGLData(static_cast<CObject3D*>(pHint));
+		else if (CobjcontainerDoc::OP_DEL == lHint)
+			DestroyGLData(static_cast<CObject3D*>(pHint));
+	}
+
+
 }
 
 int CobjcontainerView::OnGLCreate()
@@ -176,51 +182,17 @@ int CobjcontainerView::OnGLCreate()
 	// Accept fragment if it closer to the camera than the former one
 	glDepthFunc(GL_LESS);
 
-	// TODO: Make sure that this is trully unnecessary
-	//GLuint VertexArrayID;
-	//glGenVertexArrays(1, &VertexArrayID);
-	//glBindVertexArray(VertexArrayID);
-
-	// Create and compile our GLSL program from the shaders
-	CString strPath;
-	theApp.GetModuleDirPath(strPath);
-
-	m_programID = LoadShaders( strPath + _T("vertShader.glsl"), strPath + _T("fragShader.glsl" ));
-
-	// Get a handle for our m_model, m_view and projection uniforms
-	m_modelID = glGetUniformLocation(m_programID, "model2world");
-	m_viewID = glGetUniformLocation(m_programID, "world2view");
-	m_projectionID = glGetUniformLocation(m_programID, "view2clip");
-
-	glm::vec4 light_ambient = glm::vec4( 0.1, 0.1, 0.1, 0.5 );
-	glm::vec4 light_diffuse = glm::vec4 ( 0.8, 1.0, 1.0, 1.0 );
-	glm::vec4 light_specular = glm::vec4( 0.8, 1.0, 1.0, 1.0 );
-
-	glUseProgram(m_programID);
-	glUniform4fv( glGetUniformLocation(m_programID, "light_ambient"), 1, &light_ambient[0]);
-	glUniform4fv( glGetUniformLocation(m_programID, "light_diffuse"), 1, &light_diffuse[0]);
-	glUniform4fv( glGetUniformLocation(m_programID, "light_specular"), 1, &light_specular[0]);
-
-	// Projection matrix : 45° Field of View, 4:3 ratio, display range : 0.1 unit <-> 100 units
-	m_projection = glm::perspective(45.0f, 4.0f / 3.0f, 0.1f, 100.0f);
-	// Camera matrix
-	m_view = glm::lookAt( glm::vec3(0, 0, 3), // Camera position in World Space
-	                    glm::vec3(0, 0, 0), // and looks at the origin
-	                    glm::vec3(0, 1, 0) // Head is up (set to 0,-1,0 to look upside-down)
-	                  );
-	// Model matrix : an identity matrix (m_model will be at the origin)
-	m_model      = glm::mat4(1.0f);
-
-	// Initialize a light
-	glm::vec4 lightPosition = glm::vec4(-20, -10, 0, 0);
-	glUniform4fv( glGetUniformLocation(m_programID, "lightPos"), 1, &lightPosition[0]);
 	return 0;
 }
 
 void CobjcontainerView::OnGLSize(int cx, int cy)
 {
-	GLfloat aspectRatio = GLfloat(cx)/cy;
-	m_projection = glm::perspective(45.0f, aspectRatio, 0.1f, 100.0f);
+	CScene* scene = static_cast<CScene*>(GetDocument()->RootObj());
+	if (scene)
+	{
+		CCamera* camera = scene->GetCamera();
+		camera->OnGLSize(cx, cy);
+	}
 }
 
 
@@ -251,18 +223,6 @@ void CobjcontainerView::OnFilePrintPreview()
 #ifndef SHARED_HANDLERS
 	AFXPrintPreview(this);
 #endif
-}
-
-void CobjcontainerView::OnLeftTurn()
-{
-	m_degRotY -= 0.3146f;
-	Invalidate();
-}
-
-void CobjcontainerView::OnRightTurn()
-{
-	m_degRotY += 0.3146f;
-	Invalidate();
 }
 
 void CobjcontainerView::OnSnapShot()
