@@ -7,7 +7,12 @@
 #include "Object3D.h"
 #include "Scene.h"
 
-
+#define SCALE_PROP2POS		0.01f
+#define SCALE_POS2PROP		100.0f
+#define SCALE_PROP2ROT		(3.1416f/180.0f)
+#define SCALE_ROT2PROP		(180.0f/3.1416f)
+#define SCALE_PROP2SCALE	0.2f
+#define SCALE_SCALE2PROP	5.0f
 
 // CObject3D
 IMPLEMENT_SERIAL(CObject3D, CObject, 1)
@@ -192,92 +197,92 @@ bool CObject3D::GetName(const CObject3D* pThis, _variant_t& vName)
 
 bool CObject3D::SetPosX(CObject3D* pThis, const _variant_t& posX)
 {
-	pThis->m_pos.x = posX;
+	pThis->m_pos.x = (int)posX * SCALE_PROP2POS;
 	return true;
 }
 bool CObject3D::GetPosX(const CObject3D* pThis, _variant_t& posX)
 {
-	posX = (int)pThis->m_pos.x;
+	posX = (int)(pThis->m_pos.x * SCALE_POS2PROP);
 	return true;
 }
 bool CObject3D::SetPosY(CObject3D* pThis, const _variant_t& posY)
 {
-	pThis->m_pos.y = posY;
+	pThis->m_pos.y = (int)posY * SCALE_POS2PROP;
 	return true;
 }
 bool CObject3D::GetPosY(const CObject3D* pThis, _variant_t& posY)
 {
-	posY = (int)pThis->m_pos.y;
+	posY = (int)(pThis->m_pos.y * SCALE_PROP2POS);
 	return true;
 }
 bool CObject3D::SetPosZ(CObject3D* pThis, const _variant_t& posZ)
 {
-	pThis->m_pos.z = posZ;
+	pThis->m_pos.z = (int)posZ * SCALE_PROP2POS;
 	return true;
 }
 bool CObject3D::GetPosZ(const CObject3D* pThis, _variant_t& posZ)
 {
-	posZ = (int)pThis->m_pos.z;
+	posZ = (int)(pThis->m_pos.z * SCALE_POS2PROP);
 	return true;
 }
 bool CObject3D::SetRotX(CObject3D* pThis, const _variant_t& rotX)
 {
-	pThis->m_rot.x = rotX;
+	pThis->m_rot.x = (int)rotX * SCALE_PROP2ROT;
 	return true;
 }
 bool CObject3D::GetRotX(const CObject3D* pThis, _variant_t& rotX)
 {
-	rotX = (int)pThis->m_rot.x;
+	rotX = (int)(pThis->m_rot.x * SCALE_ROT2PROP);
 	return true;
 }
 bool CObject3D::SetRotY(CObject3D* pThis, const _variant_t& rotY)
 {
-	pThis->m_rot.y = rotY;
+	pThis->m_rot.y = (int)rotY * SCALE_PROP2ROT;
 	return true;
 }
 bool CObject3D::GetRotY(const CObject3D* pThis, _variant_t& rotY)
 {
-	rotY = (int)pThis->m_rot.y;
+	rotY = (int)(pThis->m_rot.y * SCALE_ROT2PROP);
 	return true;
 }
 bool CObject3D::SetRotZ(CObject3D* pThis, const _variant_t& rotZ)
 {
-	pThis->m_rot.z = rotZ;
+	pThis->m_rot.z = (int)rotZ * SCALE_PROP2ROT;
 	return true;
 }
 bool CObject3D::GetRotZ(const CObject3D* pThis, _variant_t& rotZ)
 {
-	rotZ = (int)pThis->m_rot.z;
+	rotZ = (int)(pThis->m_rot.z * SCALE_ROT2PROP);
 	return true;
 }
 bool CObject3D::SetScaleX(CObject3D* pThis, const _variant_t& scaleX)
 {
-	pThis->m_scale.x = scaleX;
+	pThis->m_scale.x = (int)scaleX * SCALE_PROP2SCALE;
 	return true;
 }
 bool CObject3D::GetScaleX(const CObject3D* pThis, _variant_t& scaleX)
 {
-	scaleX = (int)pThis->m_scale.x;
+	scaleX = (int)(pThis->m_scale.x * SCALE_SCALE2PROP);
 	return true;
 }
 bool CObject3D::SetScaleY(CObject3D* pThis, const _variant_t& scaleY)
 {
-	pThis->m_scale.y = scaleY;
+	pThis->m_scale.y = (int)scaleY * SCALE_PROP2SCALE;
 	return true;
 }
 bool CObject3D::GetScaleY(const CObject3D* pThis, _variant_t& scaleY)
 {
-	scaleY = (int)pThis->m_scale.y;
+	scaleY = (int)(pThis->m_scale.y * SCALE_SCALE2PROP);
 	return true;
 }
 bool CObject3D::SetScaleZ(CObject3D* pThis, const _variant_t& scaleZ)
 {
-	pThis->m_scale.z = scaleZ;
+	pThis->m_scale.z = (int)scaleZ * SCALE_PROP2SCALE;
 	return true;
 }
 bool CObject3D::GetScaleZ(const CObject3D* pThis, _variant_t& scaleZ)
 {
-	scaleZ = (int)pThis->m_scale.z;
+	scaleZ = (int)(pThis->m_scale.z * SCALE_SCALE2PROP);
 	return true;
 }
 
