@@ -29,10 +29,8 @@ public:
 		strName = m_strName;
 	}
 
-	void Model2World(Matrix4x4& model2world)
-	{
-		model2world = glm::mat4(1.0f);
-	}
+	void Model2World(Matrix4x4& model2world);
+
 
 
 	virtual void RemoveSelf();

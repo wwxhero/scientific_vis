@@ -7,12 +7,13 @@
 #include "Object3D.h"
 #include "Scene.h"
 
+
 #define SCALE_PROP2POS		0.01f
 #define SCALE_POS2PROP		100.0f
 #define SCALE_PROP2ROT		(3.1416f/180.0f)
 #define SCALE_ROT2PROP		(180.0f/3.1416f)
-#define SCALE_PROP2SCALE	0.2f
-#define SCALE_SCALE2PROP	5.0f
+#define SCALE_PROP2SCALE	0.01f
+#define SCALE_SCALE2PROP	100.0f
 
 // CObject3D
 IMPLEMENT_SERIAL(CObject3D, CObject, 1)
@@ -82,6 +83,42 @@ void CObject3D::glDestroy()
 
 void CObject3D::glUpdate()
 {
+
+}
+
+void CObject3D::Model2World(Matrix4x4& m2w)
+{
+	m2w = Matrix4x4(1);
+
+	CObject3D* p = this;
+
+	while (NULL != p)
+	{
+		Matrix4x4 l2p;
+		Matrix4x4 i = Matrix4x4(1);
+		Matrix4x4 s = glm::scale(i, p->m_scale);
+		l2p = s;
+		Vector3 axis[] = {
+			Vector3(1, 0, 0)
+			, Vector3(0, 1, 0)
+			, Vector3(0, 0, 1)
+		};
+		Matrix4x4 r;
+		for (int i = 0; i < 3; i ++)
+		{
+			r = glm::rotate(l2p, p->m_rot[i], axis[i]);
+			l2p = r;
+		}
+		l2p[3][0] = p->m_pos.x;
+		l2p[3][1] = p->m_pos.y;
+		l2p[3][2] = p->m_pos.z;
+		m2w = l2p * m2w;
+		p = p->m_parent;
+	}
+
+
+
+
 
 }
 
@@ -207,12 +244,12 @@ bool CObject3D::GetPosX(const CObject3D* pThis, _variant_t& posX)
 }
 bool CObject3D::SetPosY(CObject3D* pThis, const _variant_t& posY)
 {
-	pThis->m_pos.y = (int)posY * SCALE_POS2PROP;
+	pThis->m_pos.y = (int)posY * SCALE_PROP2POS;
 	return true;
 }
 bool CObject3D::GetPosY(const CObject3D* pThis, _variant_t& posY)
 {
-	posY = (int)(pThis->m_pos.y * SCALE_PROP2POS);
+	posY = (int)(pThis->m_pos.y * SCALE_POS2PROP);
 	return true;
 }
 bool CObject3D::SetPosZ(CObject3D* pThis, const _variant_t& posZ)

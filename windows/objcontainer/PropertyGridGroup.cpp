@@ -3,8 +3,8 @@
 #include <queue>
 #include "PropertyGridGroup.h"
 #include "PropertyItem.h"
-#define SPIN_MIN -100
-#define SPIN_MAX +100
+#define SPIN_MIN -1000
+#define SPIN_MAX +1000
 
 IMPLEMENT_DYNCREATE(CPropertyGridGroup, CMFCPropertyGridProperty)
 CPropertyGridGroup::CPropertyGridGroup(void)

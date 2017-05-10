@@ -6,6 +6,7 @@
 #include "MainFrm.h"
 #include "objcontainer.h"
 #include "PropertyItem.h"
+#include "PropertyGridGroup.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -305,8 +306,14 @@ void CViewProperties::InitPropListObsolete()
 LRESULT CViewProperties::OnPropertyChanged(WPARAM wp,LPARAM lp)
 {
 	CMFCPropertyGridProperty* modified = (CMFCPropertyGridProperty*)lp;
-	ATLASSERT(modified->IsKindOf(RUNTIME_CLASS(CPropertyItem)));
-	(static_cast<CPropertyItem*>(modified))->Update(m_pActObj, false);
+	if (modified->IsKindOf(RUNTIME_CLASS(CPropertyItem)))
+	{
+		(static_cast<CPropertyItem*>(modified))->Update(m_pActObj, false);
+	}
+	else if(modified->IsKindOf(RUNTIME_CLASS(CPropertyGridGroup)))
+	{
+		(static_cast<CPropertyGridGroup*>(modified))->Update(m_pActObj, false);
+	}
 	CobjcontainerDoc* pDoc = GetDocument();
 	pDoc->UpdateAllViews(this, CobjcontainerDoc::OP_PROPCH, m_pActObj);
 	UpdateTitle();
