@@ -57,11 +57,19 @@
 #endif
 
 
+
 #include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/matrix_inverse.hpp>
+
 typedef float Real;
 typedef glm::tmat4x4<Real> Matrix4x4;
 typedef glm::tvec4<Real> Vector4;
 typedef glm::tvec3<Real> Vector3;
+
+
+#include <GL/glew.h>
+#include <GL/wglew.h>
 
 //#define TEST_CNN
 

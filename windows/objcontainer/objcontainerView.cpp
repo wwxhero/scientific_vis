@@ -8,15 +8,10 @@
 #ifndef SHARED_HANDLERS
 #include "objcontainer.h"
 #endif
-
+#include <queue>
 #include "objcontainerDoc.h"
 #include "objcontainerView.h"
 
-// glm::vec3, glm::vec4, glm::ivec4, glm::mat4
-#include <glm/glm.hpp>
-// glm::translate, glm::rotate, glm::scale, glm::perspective
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/matrix_inverse.hpp>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -81,50 +76,40 @@ void DumpMatrix3x3(const glm::mat3& m)
 	}
 }
 
+void CobjcontainerView::DrawScene(CScene* pScene)
+{
+	CCamera* pCamera = pScene->GetCamera();
+	const Matrix4x4& world2view = pCamera->World2View();
+	const Matrix4x4& view2clip = pCamera->View2Clip();
+	CObject3D* root = pScene;
+	std::queue<CObject3D*> tq;
+	tq.push(root);
+	while(!tq.empty())
+	{
+		CObject3D* n = tq.front();
+		tq.pop();
 
+		//n->glDraw(world2view, view2clip);// this causes the shader program to switch frequently, performance therefore sacrifies.
+		n->glDraw(m_view, m_projection);
+
+		CObject3D* c = n->GetFirstChild();
+		while(NULL != c)
+		{
+			tq.push(c);
+			c = c->GetNextSibbling();
+		}
+	}
+}
 
 // CobjcontainerView drawing
 void CobjcontainerView::OnGLDraw()
 {
-	TRACE(_T("CobjcontainerView::OnGLDraw\n"));
-	// glClearColor(0, 1, 0, 0);
-	glClearColor(0, 1, 0, 0);
-	glClearDepth(1);
-	// Clear the screne
-
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	if (m_objModel)
+	CobjcontainerDoc* pDoc = GetDocument();
+	CObject3D* pObj =  pDoc->RootObj();
+	if (NULL != pObj)
 	{
-		m_model = glm::mat4(1.0f);
-		glm::mat4 xRotMat = glm::rotate(glm::mat4(1.0f), 0.0f, glm::normalize(glm::vec3(glm::inverse(m_model) * glm::vec4(1, 0, 0, 1))) );
-		m_model = m_model * xRotMat;
-		glm::mat4 yRotMat = glm::rotate(glm::mat4(1.0f), m_degRotY, glm::normalize(glm::vec3(glm::inverse(m_model) * glm::vec4(0, 1, 0, 1))) );
-		m_model = m_model * yRotMat;
-
-		glm::mat4 modelViewMatrix = m_view * m_model;
-		glm::mat3 normalMatrix = glm::inverseTranspose(glm::mat3(modelViewMatrix)); // Normal Matrix
-
-		// Use our shader
-		glUseProgram(m_programID);
-		// Send the m_model, m_view and projection matrices to the shader
-		glUniformMatrix4fv(m_modelID, 1, GL_FALSE, &m_model[0][0]);
-		glUniformMatrix4fv(m_viewID, 1, GL_FALSE, &m_view[0][0]);
-		glUniformMatrix4fv(m_projectionID, 1, GL_FALSE, &m_projection[0][0]);
-		glUniformMatrix3fv( glGetUniformLocation(m_programID, "model2view"), 1, GL_FALSE, &normalMatrix[0][0]);
-
-		glmDrawVBO(m_objModel, m_programID);
-
-		TRACE(_T("m_programID:%d, m_modelID:%d, m_projectionID:%d\n"), m_programID, m_modelID, m_projectionID);
-
-		TRACE(_T("\nmodel matrix\n"));
-		DumpMatrix4x4(m_model);
-		TRACE(_T("\nview matrix\n"));
-		DumpMatrix4x4(m_view);
-		TRACE(_T("\nProjection matrx\n"));
-		DumpMatrix4x4(m_projection);
-		TRACE(_T("\nnormalMatrix\n"));
-		DumpMatrix3x3(normalMatrix);
+		ATLASSERT(pObj->IsKindOf(RUNTIME_CLASS(CScene)));
+		DrawScene(static_cast<CScene*>(pObj));
 	}
 }
 
@@ -270,13 +255,13 @@ void CobjcontainerView::OnFilePrintPreview()
 
 void CobjcontainerView::OnLeftTurn()
 {
-	m_degRotY -= 0.3146;
+	m_degRotY -= 0.3146f;
 	Invalidate();
 }
 
 void CobjcontainerView::OnRightTurn()
 {
-	m_degRotY += 0.3146;
+	m_degRotY += 0.3146f;
 	Invalidate();
 }
 

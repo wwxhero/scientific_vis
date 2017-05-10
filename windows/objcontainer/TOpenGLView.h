@@ -4,6 +4,7 @@
 
 #include <GL/glew.h>
 #include <GL/wglew.h>
+#include "ObjectWaveFront.h"
 
 template<typename TThis>
 class TOpenGLView
@@ -80,6 +81,8 @@ protected:
 		}
 
 		int result = OnGLCreate();
+
+		CObjectWaveFront::s_shader.Build();
 
 		wglMakeCurrent(NULL, NULL);
 		pThis->ReleaseDC(pDC);

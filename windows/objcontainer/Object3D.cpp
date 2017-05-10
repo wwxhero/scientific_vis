@@ -21,6 +21,7 @@ CObject3D::CObject3D()
 	, m_pos(0)
 	, m_rot(0)
 	, m_scale(1)
+	, m_programID(0)
 {
 #ifdef TEST_SIERALIZATION
 	for (int c = 0; c < 4; c ++)
@@ -41,18 +42,6 @@ CObject3D::~CObject3D()
 void CObject3D::Serialize(CArchive& ar)
 {
 	BOOL storing = ar.IsStoring();
-	// for (int c = 0; c < 4; c ++)
-	// {
-	// 	Vector4& v = m_local2parent[c];
-	// 	for (int r = 0; r < 4; r ++)
-	// 	{
-	// 		Real& e = v[r];
-	// 		if (storing)
-	// 			ar << e;
-	// 		else
-	// 			ar >> e;
-	// 	}
-	// }
 	Vector3* v3s[] = {&m_pos, &m_rot, &m_scale};
 	if (storing)
 	{
@@ -73,6 +62,12 @@ void CObject3D::Serialize(CArchive& ar)
 		}
 	}
 	CTreeNodePersist::Serialize(ar);
+}
+
+
+void CObject3D::glDraw(const Matrix4x4& w2v, const Matrix4x4& v2c)
+{
+
 }
 
 void CObject3D::DumpData()

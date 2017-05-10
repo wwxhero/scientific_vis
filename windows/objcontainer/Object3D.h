@@ -1,6 +1,9 @@
 #pragma once
 #include "TreeNodePersist.h"
 // CObject3D command target
+
+
+
 class CObject3D : public CObject
 				, public CTreeNodePersist<CObject3D>
 {
@@ -25,7 +28,15 @@ public:
 	{
 		strName = m_strName;
 	}
+
+	void Model2World(Matrix4x4& model2world)
+	{
+		model2world = glm::mat4(1.0f);
+	}
+
 	virtual void RemoveSelf();
+
+	virtual void glDraw(const Matrix4x4& w2v, const Matrix4x4& v2c);
 
 	static bool Connect(CObject3D* parent, CObject3D* child);
 
@@ -64,6 +75,12 @@ protected:
 	Vector3 m_pos;
 	Vector3 m_rot; //in angle
 	Vector3 m_scale;
+
+
+	GLuint m_programID;
+
+
+
 };
 
 

@@ -23,6 +23,8 @@ v-0.7
 for the width and height arguements.
 
 */
+#ifndef _LIBOBJ_H
+#define _LIBOBJ_H
 
 
 #include <math.h>
@@ -317,3 +319,5 @@ OBJVIS_API_FUNC(GLvoid, glmLoadInVBO)(GLMmodel* model);
 OBJVIS_API_FUNC(GLvoid, glmDrawVBO)(GLMmodel* model, GLuint program);
 
 OBJVIS_API_FUNC(GLuint, LoadShaders)(const char * vertex_file_path,const char * fragment_file_path);
+
+#endif

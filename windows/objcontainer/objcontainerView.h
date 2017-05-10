@@ -47,6 +47,9 @@ protected:
 	virtual void OnUpdateGLData();
 	virtual void OnGLSize(int cx, int cy);
 
+private:
+	void DrawScene(CScene* pScene);
+
 // Generated message map functions
 protected:
 	afx_msg void OnFilePrintPreview();
