@@ -55,15 +55,23 @@ void CPropertyGridGroup::Initiate(const CObject3D* pObj, _Initializer** params)
 			_GInitializer* g = (_GInitializer*)c;
 			c->propPane = new CPropertyGridGroup(g->name, g->bIsValueList);
 		}
-		else
+		else if(ItemEdit == c->pt)
 		{
 			_IInitializer* i = (_IInitializer*)c;
 			_variant_t v;
 			i->pipe.get(pObj, v);
 			c->propPane = new CPropertyItem(i->name, v, i->pipe, i->descr);
-			if (i->bSpinable)
-				c->propPane->EnableSpinControl(TRUE, SPIN_MIN, SPIN_MAX);
 		}
+		else if(ItemEditSpin == c->pt)
+		{
+			_IInitializer* i = (_IInitializer*)c;
+			_variant_t v;
+			i->pipe.get(pObj, v);
+			c->propPane = new CPropertyItem(i->name, v, i->pipe, i->descr);
+			c->propPane->EnableSpinControl(TRUE, SPIN_MIN, SPIN_MAX);
+		}
+
+
 		AddSubItem(c->propPane);
 
 		tq.push(c);
@@ -83,14 +91,20 @@ void CPropertyGridGroup::Initiate(const CObject3D* pObj, _Initializer** params)
 				_GInitializer* g = (_GInitializer*)c;
 				c->propPane = new CPropertyGridGroup(g->name, g->bIsValueList);
 			}
-			else
+			else if(ItemEdit == c->pt)
 			{
 				_IInitializer* i = (_IInitializer*)c;
 				_variant_t v;
 				i->pipe.get(pObj, v);
 				c->propPane = new CPropertyItem(i->name, v, i->pipe, i->descr);
-				if (i->bSpinable)
-					c->propPane->EnableSpinControl(TRUE, SPIN_MIN, SPIN_MAX);
+			}
+			else if(ItemEditSpin == c->pt)
+			{
+				_IInitializer* i = (_IInitializer*)c;
+				_variant_t v;
+				i->pipe.get(pObj, v);
+				c->propPane = new CPropertyItem(i->name, v, i->pipe, i->descr);
+				c->propPane->EnableSpinControl(TRUE, SPIN_MIN, SPIN_MAX);
 			}
 			n->propPane->AddSubItem(c->propPane);
 

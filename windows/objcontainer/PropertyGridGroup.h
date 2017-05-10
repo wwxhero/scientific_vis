@@ -4,7 +4,7 @@
 #include "PropertyItem.h"
 
 const int c_idxNULL = -1;
-enum PT {Group, Item};
+enum PT {Group, ItemEdit, ItemEditSpin};
 struct _Initializer
 {
 	PT pt;
@@ -20,10 +20,9 @@ struct _IInitializer : public _Initializer
 	LPCTSTR name;
 	LPCTSTR descr;
 	Pipe pipe;
-	BOOL bSpinable;
-	_IInitializer(int a_firstChild, int a_nextSibbling, LPCTSTR a_name, LPCTSTR a_descr, Set set, Get get, BOOL a_Spinable = FALSE)
+	_IInitializer(int a_firstChild, int a_nextSibbling, LPCTSTR a_name, LPCTSTR a_descr, Set set, Get get, PT a_pt)
 	{
-		pt = Item;
+		pt = a_pt;
 		idxFirstChild = a_firstChild;
 		idxNextSibbling = a_nextSibbling;
 		name = a_name;
@@ -31,9 +30,10 @@ struct _IInitializer : public _Initializer
 		pipe.set = set;
 		pipe.get = get;
 		propPane = NULL;
-		bSpinable = a_Spinable;
 	}
 };
+
+
 
 struct _GInitializer : public _Initializer
 {
