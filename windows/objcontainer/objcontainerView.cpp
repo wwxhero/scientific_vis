@@ -78,7 +78,10 @@ void CobjcontainerView::OnInitialUpdate()
 	CRect rc;
 	GetClientRect(&rc);
 	OnGLSize(rc.Width(), rc.Height());
+	InitialUpdateGLData();
 }
+
+
 
 void CobjcontainerView::DrawScene(CScene* pScene)
 {
@@ -117,6 +120,28 @@ void CobjcontainerView::OnGLDraw()
 	}
 }
 
+void CobjcontainerView::OnGLInitialUpdate()
+{
+	CObject3D* root = GetDocument()->RootObj();
+	std::queue<CObject3D*> tq;
+	tq.push(root);
+	while(!tq.empty())
+	{
+		CObject3D* n = tq.front();
+		tq.pop();
+
+		n->glUpdateVBO();
+		//n->glDraw(m_view, m_projection);
+
+		CObject3D* c = n->GetFirstChild();
+		while(NULL != c)
+		{
+			tq.push(c);
+			c = c->GetNextSibbling();
+		}
+	}
+}
+
 void CobjcontainerView::OnGLDestroy(CObject3D* pObj)
 {
 	CObject3D* root = (NULL == pObj ? GetDocument()->RootObj() : pObj);
@@ -146,7 +171,7 @@ void CobjcontainerView::OnDraw(CDC* pDC)
 
 void CobjcontainerView::OnUpdateGLData(CObject3D* pObj)
 {
-	pObj->glUpdate();
+	pObj->glUpdateVBO();
 }
 
 void CobjcontainerView::OnDestroy()
@@ -161,7 +186,8 @@ void CobjcontainerView::OnUpdate(CView* pSender, LPARAM lHint, CObject* pHint)
 	if (NULL != pHint
 		&& (pHint->IsKindOf(RUNTIME_CLASS(CObject3D))))
 	{
-		if (CobjcontainerDoc::OP_NEW == lHint)
+		if (CobjcontainerDoc::OP_NEW == lHint
+			|| CobjcontainerDoc::OP_UPDATEVBF == lHint)
 			UpdateGLData(static_cast<CObject3D*>(pHint));
 		else if (CobjcontainerDoc::OP_DEL == lHint)
 			DestroyGLData(static_cast<CObject3D*>(pHint));

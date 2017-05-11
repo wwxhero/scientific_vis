@@ -10,12 +10,13 @@ IMPLEMENT_DYNCREATE(CPropertyGridGroup, CMFCPropertyGridProperty)
 CPropertyGridGroup::CPropertyGridGroup(void)
 	: CMFCPropertyGridProperty(_T(""))
 {
+	m_code = CobjcontainerDoc::OP_UNDEF;
 }
 
-CPropertyGridGroup::CPropertyGridGroup(const CString& strGroupName, BOOL bIsValueList)
+CPropertyGridGroup::CPropertyGridGroup(const CString& strGroupName, BOOL bIsValueList, CobjcontainerDoc::OP code)
 	: CMFCPropertyGridProperty(strGroupName, 0, bIsValueList)
 {
-
+	m_code = code;
 }
 
 CPropertyGridGroup::~CPropertyGridGroup(void)
@@ -34,11 +35,21 @@ bool CPropertyGridGroup::Update(CObject3D* pObj, bool bObj2Prop)
 	while(pos && updated)
 	{
 		CMFCPropertyGridProperty* propPage = m_lstSubItems.GetNext(pos);
+		IUIProperty* pProperty = NULL;
 		if (propPage->IsKindOf(RUNTIME_CLASS(CPropertyItem)))
 		{
-			CPropertyItem *item = static_cast<CPropertyItem*>(propPage);
-			updated = item->Update(pObj, bObj2Prop);
+			pProperty = static_cast<CPropertyItem*>(propPage);
 		}
+		else if(propPage->IsKindOf(RUNTIME_CLASS(CPropertyItemFile)))
+		{
+			pProperty = static_cast<CPropertyItemFile*>(propPage);
+		}
+		else if(propPage->IsKindOf(RUNTIME_CLASS(CPropertyGridGroup)))
+		{
+			pProperty = static_cast<CPropertyGridGroup*>(propPage);
+		}
+		ASSERT(NULL != pProperty);
+		updated = pProperty->Update(pObj, bObj2Prop);
 	}
 	return updated;
 }
@@ -53,22 +64,30 @@ void CPropertyGridGroup::Initiate(const CObject3D* pObj, _Initializer** params)
 		if (Group == c->pt)
 		{
 			_GInitializer* g = (_GInitializer*)c;
-			c->propPane = new CPropertyGridGroup(g->name, g->bIsValueList);
+			c->propPane = new CPropertyGridGroup(g->name, g->bIsValueList, g->code);
 		}
 		else if(ItemEdit == c->pt)
 		{
 			_IInitializer* i = (_IInitializer*)c;
 			_variant_t v;
 			i->pipe.get(pObj, v);
-			c->propPane = new CPropertyItem(i->name, v, i->pipe, i->descr);
+			c->propPane = new CPropertyItem(i->name, v, i->pipe, i->descr, i->code);
 		}
 		else if(ItemEditSpin == c->pt)
 		{
 			_IInitializer* i = (_IInitializer*)c;
 			_variant_t v;
 			i->pipe.get(pObj, v);
-			c->propPane = new CPropertyItem(i->name, v, i->pipe, i->descr);
+			c->propPane = new CPropertyItem(i->name, v, i->pipe, i->descr, i->code);
 			c->propPane->EnableSpinControl(TRUE, SPIN_MIN, SPIN_MAX);
+		}
+		else if(ItemFile == c->pt)
+		{
+			_IInitializer* i = (_IInitializer*)c;
+			_variant_t v;
+			i->pipe.get(pObj, v);
+			static const TCHAR szFilter[] = _T("Wavefront Files(*.obj)|*.obj|All Files(*.*)|*.*||");
+			c->propPane = new CPropertyItemFile(i->name, v, i->pipe, i->descr, i->code, TRUE, _T(""), _T("obj"), 0, szFilter);
 		}
 
 
@@ -105,6 +124,14 @@ void CPropertyGridGroup::Initiate(const CObject3D* pObj, _Initializer** params)
 				i->pipe.get(pObj, v);
 				c->propPane = new CPropertyItem(i->name, v, i->pipe, i->descr);
 				c->propPane->EnableSpinControl(TRUE, SPIN_MIN, SPIN_MAX);
+			}
+			else if(ItemFile == c->pt)
+			{
+				_IInitializer* i = (_IInitializer*)c;
+				_variant_t v;
+				i->pipe.get(pObj, v);
+				static const TCHAR szFilter[] = _T("Wavefront Files(*.obj)|*.obj|All Files(*.*)|*.*||");
+				c->propPane = new CPropertyItemFile(i->name, v, i->pipe, i->descr, i->code, TRUE, _T(""),  _T("obj"), 0, szFilter);
 			}
 			n->propPane->AddSubItem(c->propPane);
 

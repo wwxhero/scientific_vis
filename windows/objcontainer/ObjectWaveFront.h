@@ -33,14 +33,21 @@ public:
 	CObjectWaveFront(void);
 	virtual ~CObjectWaveFront(void);
 	virtual void glDraw(const Matrix4x4& w2v, const Matrix4x4& v2c);
-	virtual void glUpdate();
+	virtual void glUpdateVBO();
 	virtual void glDestroy();
 private:
+	void LoadModel();
+	virtual void Serialize(CArchive& ar);
+private:
 	GLMmodel* m_objModel;
+	CString m_strFilePath;
 private:
 	static GLuint s_programID;
 	static GLuint s_vIDs[CShaderCompiler::Total];
 public:
 	static CShaderCompiler s_shader;
+
+	static bool SetFilePath(CObject3D* pThis, const _variant_t& path);
+	static bool GetFilePath(const CObject3D* pThis, _variant_t& path);
 };
 

@@ -3,10 +3,11 @@
 
 IMPLEMENT_DYNAMIC(CPropertyItem, CMFCPropertyGridProperty)
 
-CPropertyItem::CPropertyItem(const CString& strName, const _variant_t& v, Pipe pipe, LPCTSTR lpszDescr)
+CPropertyItem::CPropertyItem(const CString& strName, const _variant_t& v, Pipe pipe, LPCTSTR lpszDescr, CobjcontainerDoc::OP code)
 	: CMFCPropertyGridProperty(strName, v, lpszDescr)
-	, m_pipe(pipe)
 {
+	m_pipe = pipe;
+	m_code = code;
 }
 
 
@@ -14,20 +15,28 @@ CPropertyItem::~CPropertyItem(void)
 {
 }
 
-bool CPropertyItem::Update(CObject3D* pObj, bool bObj2Prop)
+
+IMPLEMENT_DYNAMIC(CPropertyItemFile, CMFCPropertyGridFileProperty)
+
+CPropertyItemFile::CPropertyItemFile(const CString& strName
+								, const _variant_t& v
+								,  Pipe pipe
+								, LPCTSTR lpszDescr
+								, CobjcontainerDoc::OP code
+								, BOOL bOpenFileDialog
+								, const CString& strFileName
+								, LPCTSTR lpszDefExt
+								, DWORD dwFlags
+								, LPCTSTR lpszFilter
+								, DWORD_PTR dwData)
+	: CMFCPropertyGridFileProperty(strName, bOpenFileDialog, strFileName, lpszDefExt, dwFlags, lpszFilter, lpszDescr, dwData)
 {
-	_variant_t v;
-	bool done = true;
-	if (bObj2Prop)
-	{
-		done = m_pipe.get(pObj, v);
-		if (done)
-			SetValue(v);
-	}
-	else
-	{
-		v = GetValue();
-		done = m_pipe.set(pObj, v);
-	}
-	return done;
+	m_pipe = pipe;
+	m_code = code;
 }
+
+CPropertyItemFile::~CPropertyItemFile(void)
+{
+
+}
+

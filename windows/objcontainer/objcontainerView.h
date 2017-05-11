@@ -48,6 +48,7 @@ protected:
 	virtual void OnUpdateGLData(CObject3D* pObj);
 	virtual void OnGLSize(int cx, int cy);
 	virtual void OnGLDestroy(CObject3D* pObj = NULL);
+	virtual void OnGLInitialUpdate();
 
 private:
 	void DrawScene(CScene* pScene);

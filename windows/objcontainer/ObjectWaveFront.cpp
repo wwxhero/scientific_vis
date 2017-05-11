@@ -45,20 +45,6 @@ IMPLEMENT_SERIAL(CObjectWaveFront, CObject3D, 1)
 CObjectWaveFront::CObjectWaveFront(void) : m_objModel(NULL)
 {
 	m_strName = _T("Wavefront");
-
-	LPCTSTR pathPool[] = {
-		"E:\\Users\\wanxwang\\scientific_vis\\course_project\\objview\\data\\al.obj"
-		, "E:\\Users\\wanxwang\\scientific_vis\\course_project\\objview\\data\\car.obj"
-	};
-	static int r = 0;
-	m_objModel = glmReadOBJ((char*)pathPool[r++%(sizeof(pathPool)/sizeof(LPCTSTR))]);
-	// Normilize vertices
-	glmUnitize(m_objModel);
-	// Compute facet normals
-	glmFacetNormals(m_objModel);
-	// Comput vertex normals
-	glmVertexNormals(m_objModel, 90.0);
-
 }
 
 
@@ -71,21 +57,26 @@ CObjectWaveFront::~CObjectWaveFront(void)
 	}
 }
 
-void CObjectWaveFront::glUpdate()
+void CObjectWaveFront::glUpdateVBO()
 {
 	// Load the m_model (vertices and normals) into a vertex buffer
-	glmUnloadVBO(m_objModel);
-	glmLoadInVBO(m_objModel);
+	if (NULL != m_objModel)
+	{
+		glmUnloadVBO(m_objModel);
+		glmLoadInVBO(m_objModel);
+	}
 }
 
 void CObjectWaveFront::glDestroy()
 {
-	glmUnloadVBO(m_objModel);
+	if (NULL != m_objModel)
+		glmUnloadVBO(m_objModel);
 }
 
 void CObjectWaveFront::glDraw(const Matrix4x4& w2v, const Matrix4x4& v2c)
 {
-
+	if (NULL == m_objModel)
+		return;
 
 	GLuint programID = (0 == m_programID ? CObjectWaveFront::s_programID : m_programID);
 	ASSERT(0 != programID);
@@ -103,4 +94,56 @@ void CObjectWaveFront::glDraw(const Matrix4x4& w2v, const Matrix4x4& v2c)
 
 	glmDrawVBO(m_objModel, programID);
 
+}
+
+void CObjectWaveFront::Serialize(CArchive& ar)
+{
+	if (ar.IsStoring())
+	{
+		ar << m_strFilePath;
+	}
+	else
+	{
+		ar >> m_strFilePath;
+		LoadModel();
+	}
+	CObject3D::Serialize(ar);
+}
+
+void CObjectWaveFront::LoadModel()
+{
+	LPCTSTR wPath = m_strFilePath;
+	CFileFind fd;
+	bool fe = fd.FindFile(wPath);
+	fd.Close();
+	if (!fe)
+		return;
+	CT2A aPath(wPath);
+	if (m_objModel)
+	{
+		glmDelete(m_objModel);
+		m_objModel = NULL;
+	}
+	m_objModel = glmReadOBJ((char*)aPath);
+	// Normilize vertices
+	glmUnitize(m_objModel);
+	// Compute facet normals
+	glmFacetNormals(m_objModel);
+	// Comput vertex normals
+	glmVertexNormals(m_objModel, 90.0);
+}
+
+bool CObjectWaveFront::SetFilePath(CObject3D* pThis, const _variant_t& path)
+{
+	ATLASSERT(pThis->IsKindOf(RUNTIME_CLASS(CObjectWaveFront)));
+	((CObjectWaveFront *)pThis)->m_strFilePath = path;
+	((CObjectWaveFront *)pThis)->LoadModel();
+	return true;
+
+}
+bool CObjectWaveFront::GetFilePath(const CObject3D* pThis, _variant_t& path)
+{
+	ATLASSERT(pThis->IsKindOf(RUNTIME_CLASS(CObjectWaveFront)));
+	path = ((CObjectWaveFront*)pThis)->m_strFilePath;
+	return true;
 }

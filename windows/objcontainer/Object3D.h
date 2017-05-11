@@ -36,7 +36,7 @@ public:
 	virtual void RemoveSelf();
 
 	virtual void glDraw(const Matrix4x4& w2v, const Matrix4x4& v2c);
-	virtual void glUpdate();
+	virtual void glUpdateVBO();
 	virtual void glDestroy();
 
 	static bool Connect(CObject3D* parent, CObject3D* child);
@@ -62,9 +62,9 @@ public:
 	static bool SetScaleZ(CObject3D* pThis, const _variant_t& scaleZ);
 	static bool GetScaleZ(const CObject3D* pThis, _variant_t& scaleZ);
 
-private:
+protected:
 	virtual void Serialize(CArchive& ar);
-
+private:
 	Matrix4x4 m_local2parent;
 	Matrix4x4 m_parent2local;
 

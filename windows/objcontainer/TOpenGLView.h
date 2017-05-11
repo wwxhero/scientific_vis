@@ -22,6 +22,7 @@ private:
 	virtual void OnUpdateGLData(CObject3D* pObj) = 0;
 	virtual void OnGLSize(int cx, int cy) = 0;
 	virtual void OnGLDestroy(CObject3D* pObj = NULL) = 0;
+	virtual void OnGLInitialUpdate() = 0;
 protected:
 	int OnCreate(LPCREATESTRUCT lpCreateStruct)
 	{
@@ -94,6 +95,7 @@ protected:
 
 		return result;
 	}
+
 	void OnDestroy()
 	{
 		TThis *pThis = static_cast<TThis*>(this);
@@ -119,6 +121,17 @@ protected:
 		wglMakeCurrent(NULL, NULL);
 		pThis->ReleaseDC(pDC);
 
+	}
+
+	void InitialUpdateGLData()
+	{
+		TThis *pThis = static_cast<TThis*>(this);
+		CDC *pDC = pThis->GetDC();
+		wglMakeCurrent(pDC->m_hDC, m_hrc);
+		OnGLInitialUpdate();
+
+		wglMakeCurrent(NULL, NULL);
+		pThis->ReleaseDC(pDC);
 	}
 
 	void OnDraw(CDC *pDC)

@@ -306,16 +306,25 @@ void CViewProperties::InitPropListObsolete()
 LRESULT CViewProperties::OnPropertyChanged(WPARAM wp,LPARAM lp)
 {
 	CMFCPropertyGridProperty* modified = (CMFCPropertyGridProperty*)lp;
+	IUIProperty* pProperty = NULL;
 	if (modified->IsKindOf(RUNTIME_CLASS(CPropertyItem)))
 	{
-		(static_cast<CPropertyItem*>(modified))->Update(m_pActObj, false);
+		 pProperty = static_cast<CPropertyItem*>(modified);
+	}
+	else if(modified->IsKindOf(RUNTIME_CLASS(CPropertyItemFile)))
+	{
+		pProperty = static_cast<CPropertyItemFile*>(modified);
 	}
 	else if(modified->IsKindOf(RUNTIME_CLASS(CPropertyGridGroup)))
 	{
-		(static_cast<CPropertyGridGroup*>(modified))->Update(m_pActObj, false);
+		pProperty = static_cast<CPropertyGridGroup*>(modified);
 	}
+	ASSERT(NULL != pProperty);
+	pProperty->Update(m_pActObj, false);
 	CobjcontainerDoc* pDoc = GetDocument();
-	pDoc->UpdateAllViews(this, CobjcontainerDoc::OP_PROPCH, m_pActObj);
+	CobjcontainerDoc::OP code = pProperty->GetCode();
+	if (code != CobjcontainerDoc::OP_UNDEF)
+		pDoc->UpdateAllViews(this, code, m_pActObj);
 	UpdateTitle();
 	return 0;
 }

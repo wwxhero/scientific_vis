@@ -16,9 +16,6 @@ CPropertyGridObject3D::~CPropertyGridObject3D(void)
 void CPropertyGridObject3D::Init(const CObject3D* pObj)
 {
 	ATLASSERT(this->m_lstSubItems.IsEmpty());
-	_variant_t vName;
-	CObject3D::GetName(pObj, vName);
-	Pipe pName = {CObject3D::SetName, CObject3D::GetName};
 
 	_Initializer* params[] = {
 		  new _IInitializer(-1, 1, _T("Name"), _T("Name of the three-D object"), CObject3D::SetName, CObject3D::GetName, ItemEdit) //0: Name
