@@ -1,22 +1,29 @@
 #include "StdAfx.h"
+#include "objcontainer.h"
 #include "ObjectWaveFront.h"
 
-CShaderCompiler CObjectWaveFront::s_shader("E:\\Users\\wanxwang\\scientific_vis\\course_project\\objview\\windows\\Debug\\CObjectWaveFront", CObjectWaveFront::s_programID, CObjectWaveFront::s_vIDs);
+CShaderCompiler CObjectWaveFront::s_shader = CShaderCompiler("CObjectWaveFront", CObjectWaveFront::s_programID, CObjectWaveFront::s_vIDs);
 GLuint CObjectWaveFront::s_programID = 0;
 GLuint CObjectWaveFront::s_vIDs[CShaderCompiler::Total] = {0};
 
 
 void CShaderCompiler::Build()
 {
+	CString strRootPath;
+	theApp.GetModuleDirPath(strRootPath);
+
+
 	enum {vert = 0, frag, total};
 	LPSTR paths[total] = {NULL};
 	LPCSTR suffix[total] = {".vert", ".frag"};
-	int lenStub = strlen(m_path);
+	LPCSTR shaderName = "CObjectWaveFront";
+	int lenStub = strlen(shaderName);
 	for (int i = 0; i < sizeof(suffix)/sizeof(LPCSTR); i ++)
 	{
-		paths[i] = (LPSTR)malloc((lenStub + strlen(suffix[i])) + 1);
-		sprintf(paths[i], "%s%s", m_path, suffix[i]);
+		paths[i] = (LPSTR)malloc((strRootPath.GetLength() + lenStub + strlen(suffix[i])) + 1);
+		sprintf(paths[i], "%s%s%s", strRootPath.GetBuffer(), shaderName, suffix[i]);
 	}
+	
 	r_programID = LoadShaders(paths[vert], paths[frag]);
 	for (int i = 0; i < sizeof(suffix)/sizeof(LPCSTR); i ++)
 		free(paths[i]);

@@ -6,21 +6,19 @@ class CShaderCompiler
 public:
 	enum VARID {M2W = 0, W2V, V2C, NORMAL, Total};
 	CShaderCompiler(LPCSTR path, GLuint& programID, GLuint* vIDs)
-	 : m_path(NULL)
-	 , r_programID(programID)
+	 : r_programID(programID)
 	 , r_vIDs(vIDs)
+	 , m_path(path)
 	{
-		m_path = (LPSTR)malloc(strlen(path)+1);
-		strcpy(m_path, path);
+
 	}
 	~CShaderCompiler()
 	{
-		free(m_path);
 	}
 
 	void Build();
 private:
-	LPSTR m_path;
+	CStringA m_path;
 	GLuint& r_programID;
 	GLuint* r_vIDs;
 };
